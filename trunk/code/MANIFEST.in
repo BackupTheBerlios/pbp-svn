@@ -4,5 +4,6 @@ include pbpscript patch.diff main.aap pbp/wwwsearch.zip
 include README.txt LICENSE.txt
 graft 3rdparty
 graft Buildbot
+prune 3rdparty/.svn
+prune Buildbot/.svn
 
-global-exclude */.svn/*
