@@ -198,6 +198,7 @@ class PBPShell(cmd.Cmd, object):
         stripped = rest.strip()
         agent = agent_map.get(stripped, stripped)
         self.browser.set_persistent_headers([("User-agent", agent)])
+        self.tprintln("User agent is now: %s" % (agent,))
 
     def do_echo(self, rest):
         """echo <message>
