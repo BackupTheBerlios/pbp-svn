@@ -756,7 +756,13 @@ class BatchThread(threading.Thread):
                     self._waitScript(t, s)
                 else:
                     tprintln('*** Cascaded FAILURE: %s ***' % (s,))
-            reactor.callFromThread(self.deferred.callback, None)
+            # exit status (determined by calling callback or errback)
+            # depends on success or failure of last script
+            if self.succeeded:
+                reactor.callFromThread(self.deferred.callback, None)
+            else:
+                reactor.callFromThread(self.deferred.errback,
+                                       error.PBPScriptError())
         except Exception, e:
             reactor.callFromThread(self.deferred.errback, e)
 
@@ -843,19 +849,24 @@ def gotExit(failure):
     failure.trap(SystemExit)
     reactor.stop()
 
-
 def run(argv=sys.argv):
     o = PBPOptions()
     o.parseOptions(argv[1:])
+    batch = None
     if o['scripts']:
         d = defer.Deferred()
         batch = BatchThread(d, o['scripts'], o['cascade-failures'])
         reactor.callLater(0, batch.start)
-        gotError = lambda f: (log.err(), reactor.stop(), sys.exit(1))
+        gotError = lambda f: (log.err(), reactor.stop())
     else:
         d = threads.deferToThread(interactiveLoop)
         gotError = lambda f: log.err()
     d.addCallback(bye)
     d.addErrback(gotExit).addErrback(gotError)
+    exitcode = [0] # this may be changed by errbacks above.. wow, hacky
     reactor.run()
+    # interactive always exits with status 0; batch may or may not
+    # have been successful
+    if not getattr(batch, 'succeeded', True):
+        sys.exit(1)
 
