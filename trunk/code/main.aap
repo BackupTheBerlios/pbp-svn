@@ -15,8 +15,7 @@ all: pbp-$(version)-setup.exe pbp-$(version).zip
 
 
 pbp-$(version).zip: _version.py pbp/wwwsearch.zip
-    :sys python setup.py sdist
-    :move dist/$target .
+    :sys python setup.py sdist  --force-manifest --dist-dir .
 
 pbp-$(version)-setup.exe: dist/pbpscript/pbpscript.exe pbp/wwwsearch.zip
     :python
@@ -47,6 +46,7 @@ dist/pbpscript/pbpscript.exe: _version.py
     :sys python setup.py py2exe
     :copy LICENSE.txt dist/pbpscript
     :copy {r} 3rdparty dist/pbpscript
+    :copy {r} buildbot dist/pbpscript
 
 clean:
     :sys {f} python setup.py clean --all

@@ -1,8 +1,9 @@
-include pbpscript
-include patch.diff
-include main.aap
-include README.txt
-include LICENSE.txt
-include pbp/wwwsearch.zip
-include 3rdparty/COPYING.*
+include MANIFEST.in 
+include pbpscript patch.diff main.aap pbp/wwwsearch.zip
 
+include README.txt LICENSE.txt
+include 3rdparty COPYING.*
+
+include buildbot run_pbpcript.*
+
+global-exclude */.svn/*
