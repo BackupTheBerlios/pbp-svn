@@ -35,10 +35,12 @@ CLIENT COMMANDS
 ---------------
 formvalue <form> <field>[%NNN] <value>
 ... fv
-setfield <fieldspec> [in <formspec>] <value> [on|off]
+setfield <fieldspec> [in <formspec>] <value>
+setfield <fieldspec> [in <formspec>] <value> on|off
+setfield <fieldspec> [in <formspec>] on|off
 ... sf
-==> fieldspec: id|name|type[:number]
-==> formspec: id|name[:number]
+==> fieldspec: (id|name|type)[:number]
+==> formspec: (id|name)[:number]
 
 NAVIGATION COMMANDS
 -------------------
