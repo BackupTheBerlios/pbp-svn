@@ -94,8 +94,10 @@ class NewTimeout(Exception):
         return "New timeout of %s seconds requested" % (self.time,)
 
 class PBPShell(cmd.Cmd, object):
+    """A cmd loop that repeatedly prompts for pbp commands"""
     prompt = 'PBP> '
     def tprintln(self, *args):
+        """Print output without race conditions by writing to self.stdout"""
         self.stdout.write(' '.join([str(a) for a in args]) + '\n')
 
     def __init__(self, canfail=0):
