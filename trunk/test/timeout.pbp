@@ -1,0 +1,7 @@
+# example of a script that should fail because of a timeout
+timeout 1
+go http://pbp.berlios.de
+go http://pbp.berlios.de
+go http://pbp.berlios.de
+go http://pbp.berlios.de
+go http://pbp.berlios.de

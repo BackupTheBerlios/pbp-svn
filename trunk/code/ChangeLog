@@ -1,3 +1,18 @@
+PBP (0.2.0)
+    User-visible changes:
+    ---------------------
+    * Timeout command now works.  It times out the entire browser
+      session; so in a command like this:
+      $ pbpscript script1.pbp script2.pbp script3.pbp
+      A timeout specified in script1 can expire during the execution
+      of script2, causing both script2 and script3 to fail immediately.
+    * EOF is a synonym for quit/done.
+    Developer-visible changes:
+    --------------------------
+    * Substantial refactoring.  In batch mode, PBP now uses a thread
+      for each script (they still share the same browser session and
+      run in serial).
+    * Exception classses moved into their own module. 
 PBP (0.1.0)
     * Initial release.
 -- Cory Dodt (corydodt@twistedmatrix.com)
