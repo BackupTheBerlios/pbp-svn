@@ -52,7 +52,7 @@ threadable.init(1)
 from twisted.internet import reactor, defer, threads
 
 import sys
-import time, Queue
+import time
 import mimetypes
 import threading
 
@@ -79,13 +79,6 @@ def trunc(s, length, end=1):
     return s
 
 
-class NewTimeout(Exception):
-    """Report that a new timeout is needed"""
-    def __init__(self, time):
-        self.time = time
-    def __str__(self):
-        return "New timeout of %s seconds requested" % (self.time,)
-
 class PBPShell(cmd.Cmd, object):
     prompt = 'PBP> '
     def tprintln(self, *args):
@@ -100,7 +93,7 @@ class PBPShell(cmd.Cmd, object):
         self.last_res = None
         self.refresh_target = None
         self.refresh_time = -1
-        self.timeout = 300
+        # self.timeout = 300
         self.stored_time = -1
         self.canfail = canfail  # canfail=1 to make exceptions end loop 
         self.history = []
@@ -189,8 +182,7 @@ class PBPShell(cmd.Cmd, object):
         """
         args = self._getCountedArgs("timeout " + rest, 1)
         newtime = int(args[0])
-        self.tprintln('new timeout %s' % (newtime,))
-        raise NewTimeout(newtime)
+        self.tprintln('new timeout %s (FIXME - does nothing)' % (newtime,))
 
     def do_code(self, rest):
         """code [<NNN> [<NNN> ...]]
@@ -566,20 +558,20 @@ class PBPShell(cmd.Cmd, object):
         """
         args = self._getCountedArgs("pyload " + rest, 1)
         fn = args[0]
-        localns = {'PBP': self}
+        globalns = globals()
+        globalns['PBP'] = self
         self.tprintln("Loading file %s" % (fn,))
         for _f in (util.sibpath(self.filename, fn), fn):
             try:
-                last_err = None
-                execfile(_f, {}, localns)
+                execfile(_f, globalns)
                 break
             except EnvironmentError, e:
                 pass
         try:
             self._loaded_names = {}
-            for name in localns:
-                if name in localns['__pbp__']:
-                    self._loaded_names[name] = localns[name]
+            for name in globalns:
+                if name in globalns['__pbp__']:
+                    self._loaded_names[name] = globalns[name]
         except KeyError:
             raise error.FailedPyloadError(fn)
 
@@ -635,15 +627,15 @@ class PBPShell(cmd.Cmd, object):
                         pass # args[n] will be a string beginning with $
             line = ' '.join([s.replace(' ', r'\ ') for s in args])
             return cmd.Cmd.onecmd(self, line)
-        except (SystemExit, NewTimeout), e:
+        except (SystemExit,), e:
             raise
         except error.PBPScriptError, e:
-            self.tprintln("*** ERROR ***")
+            self.tprintln("*** ERROR - Web interaction failed ***")
             self.tprintln(e)
             if self.canfail:
                 raise
         except Exception, e:
-            self.tprintln("*** ERROR ***")
+            self.tprintln("*** ERROR - in PBP itself (?) ***")
             log.err()
             if self.canfail:
                 raise
@@ -690,27 +682,8 @@ class BatchThread(threading.Thread):
         self.deferred = deferred
         self._more_scripts = 1 # set to 0 to prevent running any scripts 
                                # that still haven't been processed
-        self.message_queue = Queue.Queue()
-        self.waiting = 1
         threading.Thread.__init__(self)
-        self.succeeded = 0
-
-    def cb_scriptDied(self, failed, script):
-        tprintln(failed)
-        tprintln('*** FAILURE: %s ***' % (script,))
-        if self.cascade:
-            self._more_scripts = 0
-        self.waiting = 0
-
-    def cb_scriptPassed(self, _dontcare, script):
-        tprintln('SUCCESS: %s' % (script,))
-        self.succeeded = 1
-
-    def cb_trapStopRequested(self, failed, script):
-        """A script thread that had already timed out kept going,
-        and raised StopRequested.  Just ignore.
-        """
-        failed.trap(StopRequested)
+        self.setDaemon(1)
 
     def run(self):
         try:
@@ -718,79 +691,25 @@ class BatchThread(threading.Thread):
             
             for s in self.scripts:
                 if self._more_scripts:
-                    d = defer.Deferred()
-                    t = ScriptThread(d, s, shell, self.message_queue)
-                    d.addCallback(lambda r: self.cb_scriptPassed(r, s))
-                    d.addErrback(lambda f: self.cb_trapStopRequested(f, s))
-                    d.addErrback(lambda f: self.cb_scriptDied(f, s))
-                    self.succeeded = 0
-                    self.waiting = 300
-                    t.timer = reactor.callLater(self.waiting, 
-                                                self._doneWaiting,
-                                                t)
-                    t.start()
-                    self._waitScript(t, s)
+                    try:
+                        runScript(s, shell)
+                        tprintln('SUCCESS: %s' % (s,))
+                    except Exception, e:
+                        print e
+                        tprintln('*** FAILURE: %s ***' % (s,))
+                        if self.cascade:
+                            self._more_scripts = 0
                 else:
                     tprintln('*** Cascaded FAILURE: %s ***' % (s,))
             self.deferred.callback(None)
         except Exception, e:
             self.deferred.errback(e)
 
-    def _waitScript(self, a_thread, script):
-        while self.waiting and not self.succeeded:
-            try:
-                timeout = self.message_queue.get_nowait()
-                if a_thread.timer:
-                    a_thread.timer.cancel()
-                self.waiting = timeout.time
-                a_thread.timer = reactor.callLater(timeout.time, 
-                                                   self._doneWaiting,
-                                                   a_thread,
-                                                   script)
-            except Queue.Empty:
-                pass
-            time.sleep(0.1)
 
-    def _doneWaiting(self, a_thread, script):
-        """After a timeout, all scripts fail.  Turn on cascade, tell
-        the thread we don't care if it keeps going, and call 
-        the failure callback.
-        """
-        a_thread.keepgoing = 0
-        self.cascade = 1
-        self.cb_scriptDied(error.TimedOutError(self.waiting, self.waiting),
-                           script)
-
-
-class ScriptThread(threading.Thread):
-    """Run commands of a single script"""
-    def __init__(self, deferred, script, shell, message_queue):
-        self.deferred = deferred
-        self.script = script
-        self.shell = shell
-        self.shell.filename = self.script
-        self.message_queue = message_queue
-        self.keepgoing = 1 # set to 0 from parent thread to stop
-        threading.Thread.__init__(self)
-        self.setDaemon(1) # if reactor stops, I will stop
-        self.timer = None
-
-    def run(self):
-        try:
-            for command in file(self.script, 'r'):
-                if self.keepgoing:
-                    try:
-                        self.shell.onecmd(command)
-                    except NewTimeout, t:
-                        self.message_queue.put(t)
-                else:
-                    raise StopRequested()
-            self.deferred.callback(None)
-        except Exception, e:
-            self.deferred.errback(e)
-
-class StopRequested(Exception):
-    """The thread was asked not to keep going by parent"""
+def runScript(script, shell):
+    for command in file(script, 'r'):
+        shell.filename = script
+        shell.onecmd(command)
 
 
 #
