@@ -177,6 +177,63 @@ class PBPShell(cmd.Cmd, object):
             url = urlblob
         return reftime, url
 
+    def do_url(self, rest):
+        """url [url]
+        Show the url of the current page or test if it's equal to the argument"""
+        args = self._getCountedArgs("url " + rest, 0, 1)
+        try:
+            res = self.browser.geturl()
+            res.strip()
+        except mechanize.BrowserStateError, e:
+            raise error.PBPScriptError(e)
+        
+        if len(args) == 0:
+            self.tprintln("The current URL is: %s" % (res,))
+        else:
+            if res == args[0]:
+                self.tprintln("OK: url was %s" % (res,))
+            else:
+                raise error.PBPScriptError("URL is %s but you expected %s" % (res, args[0]))
+
+    def do_title(self, rest):
+        """title [title]
+        Show the title of the current page or test if it's equal to the argument.
+        Surround multi words titles with single or double quotes (eg. 'my title')"""
+        args = self._getCountedArgs("title " + rest, 0, 1)
+        try:
+            res = self.browser.title()
+        except mechanize.BrowserStateError, e:
+            raise error.PBPScriptError(e)
+
+        if not res:
+            res = ""
+            
+        if len(args) == 0:
+            self.tprintln("The current title is: '%s'" % (res,))
+        else:
+            if res == args[0]:
+                self.tprintln("OK: title was '%s'" % (res,))
+            else:
+                raise error.PBPScriptError("The title is '%s' but you expected '%s'" % (res, args[0]))
+
+    def do_showlinks(self, rest):
+        """Display the links on the page"""
+        try:
+            res = self.browser.links()
+        except mechanize.BrowserStateError, e:
+            raise error.PBPScriptError(e)
+
+        for i, link in enumerate(res):
+            self.tprintln("%d - %s - %s" % (i+1, link.absolute_url, link.text))
+
+    def do_reload(self, rest):
+        """Reload the current page"""
+        try:
+            res = self.browser.reload()
+            self.tprintln("OK: done reload of %s" % (res.wrapped.url,))
+        except mechanize.BrowserStateError:
+            raise error.PBPScriptError("not viewing any document")
+
     def do_agent(self, rest):
         """agent (ie5|ie55|ie6|moz17|opera7|konq32|aol9|saf11|<your own string>)
         Change the User-agent header to pretend to be one of the above
