@@ -3,10 +3,14 @@ try:
     import py2exe
 except ImportError:
     pass
-
 globs = {}
-execfile('pbp/version.py', globs)
-version = globs['version']
+try:
+    execfile('_version.py', globs)
+    version = globs['version']
+except EnvironmentError:
+    execfile('pbp/version.py', globs)
+    version = globs['version']
+
 
 setup_args = dict(name="pbp", author="Cory Dodt", 
                   author_email='corydodt@twistedmatrix.com',

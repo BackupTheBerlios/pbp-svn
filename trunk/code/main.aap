@@ -10,10 +10,10 @@ shortver = `globs['version']`
 @import inno
 ISCC = `util.sibpath(inno.__file__, 'program/ISCC.exe')`
 
-all: pbp-$(version)-setup.exe pbp-$(shortver).zip
+all: pbp-$(version)-setup.exe pbp-$(version).zip
     :print : Done with all.
 
-pbp-$(shortver).zip:
+pbp-$(version).zip: _version.py
     :sys python setup.py sdist
     :move dist/$target .
 
@@ -36,12 +36,17 @@ pbp-$(version)-setup.exe: dist/pbpscript/pbpscript.exe
 
     :sys $(ISCC) pbp.iss
 
-dist/pbpscript/pbpscript.exe:
+_version.py:
+    # rebuilt when _no.version changes automatically :-) yay aap
+    @file('_version.py', 'w').write("version = '%s'\n" % (_no.version,))
+    
+
+dist/pbpscript/pbpscript.exe: _version.py
     :sys python setup.py py2exe
     :copy LICENSE.txt dist/pbpscript
     :copy {r} 3rdparty dist/pbpscript
 
-
 clean:
-    :del {f} *.iss* *.exe *.zip MANIFEST
+    :sys {f} python setup.py clean --all
+    :del {f} *.iss* *.exe *.zip MANIFEST _version.py
     :del {r}{f} dist build
