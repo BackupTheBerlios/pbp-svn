@@ -1,5 +1,9 @@
 	(unversioned yet) User-visible changes:
 	---------------------
+	* Buildbot: pbpstep.py runs only one .tests file, named on the command
+	  line.  This should be less surprising, and it gives more control (i.e.
+	  you can get separate boxes for different, unrelated tests in the
+	  builder.)
 	* --version prints something relevant.
 	* Name change "Python Browsing Probe" -> "Python Browser Poseur"
 	* New command: showlinks--print a nicely formatted list of the links on

@@ -7,10 +7,10 @@ class PBP(step.ShellCommand):
     flunkOnFailure = True
     name = "pbp"
 
-    def __init__(self, directory=None, **kwargs):
+    def __init__(self, filename=None, **kwargs):
         if not directory:
-            raise TypeError("please pass testdir")
-        command = "bash run_pbpscript.bash %s" % (directory,)
+            raise TypeError("please pass .tests filename")
+        command = "bash run_pbpscript.bash %s" % (filename,)
         step.ShellCommand.__init__(self, command=command, **kwargs)
 
     def startStatus(self):

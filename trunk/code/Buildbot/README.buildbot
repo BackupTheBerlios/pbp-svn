@@ -17,7 +17,8 @@ somewhere in sys.path.
     # ...
     import pbpstep
     pbp_bf = base.ConfigurableBuildFactory([
-        (pbpstep.PBP, {'directory': 'directory/to/pbp_tests/'}),
+        (pbpstep.PBP, {'filename': 'directory/to/pbp_tests/foo.tests'}),
+        (pbpstep.PBP, {'filename': 'directory/to/pbp_tests/bar.tests'}),
         ])
     BuildmasterConfig = {}
     # ... define some bots in BuildmasterConfig['bots']
@@ -25,10 +26,10 @@ somewhere in sys.path.
                                       ('pbp-tests', 'mybot', '.', pbp_bf),
                                      ]
 
-4. In master.cfg make sure the 'directory' argument points to the location
-where your pbp tests will be.  This directory should contain 1-n files named
-"*.tests".  For example:
-[my.tests]
+4. In master.cfg make sure the 'filename' argument points to a valid .tests
+file, which is just a shell script.
+For example:
+[foo.tests]
     #!/bin/bash
     pbpscript test1.pbp test2.pbp test3.pbp
     pbpscript test1.pbp test4.pbp
@@ -41,8 +42,8 @@ pbp into the buildslave's working directory.  Make sure it is executable.
 
 Done!
 
-When buildbot runs, it will cd into directory/to/pbp_tests/ and then run each
-file named ``*.tests'' with bash.  The output will be interpreted as pbp log
+When buildbot runs, it will cd into directory/to/pbp_tests/ and then run the
+named script file with bash.  The output will be interpreted as pbp log
 output, for the purposes of counting failures and successes.
 
 On the waterfall page, buildbot will display the number of successes and
