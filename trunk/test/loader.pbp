@@ -3,5 +3,7 @@ do test
 do test 1 2 3
 go $uri
 follow $link
+echo $dont_export
+echo $link
 follow $dont_export
 

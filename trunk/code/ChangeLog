@@ -1,3 +1,8 @@
+    User-visible changes:
+    * echo command, for writing messages into the log file
+    * Strings that contain literal $ but are not defined variables will 
+      be echoed literally instead of raising an AttributeError
+    * 
 PBP (0.2.2)
     User-visible changes:
     ---------------------

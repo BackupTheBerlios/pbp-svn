@@ -16,12 +16,14 @@ Examining Responses
 Local Browser Access
 ====================
     formvalue <form> <field>[%NNN] <value> - set value for field on form
+    fv        - synonym for formvalue
     back      - go back in the browser history, if possible
     show      - dump the data in the last response (e.g. the HTML page)
     showform  - print a concise summary of forms on the page
 
 Misc
 ====
+    echo <message> - Just write a message into the log.
     history [filename] - show the history of your commands, or write
                          it to a file.
     timeout <time> - give up on a browser session after <time> seconds
@@ -32,7 +34,8 @@ Misc
                          callables
     do <python_callable> [arguments] - call some python code defined
                                        in a previously-pyload'd file
-    done/quit/exit - hang up the phone
+    exit - hang up the phone
+    EOF, done, quit - synonyms for exit
 
 Note on [stopat] argument:
     This is always the last argument of a "HTTP Request"-type command.  
@@ -107,6 +110,7 @@ class PBPShell(cmd.Cmd, object):
         self.canfail = canfail  # canfail=1 to make exceptions end loop 
         self.history = []
         self.filename = "<interactive>"
+        self._loaded_names = {}
         cmd.Cmd.__init__(self)
 
     def journey(self, browsemethod):
@@ -164,6 +168,13 @@ class PBPShell(cmd.Cmd, object):
         else:
             url = urlblob
         return reftime, url
+
+    def do_echo(self, rest):
+        """echo <message>
+        Just write <message> into the log.
+        """
+        unquoted = rest.replace(r'\ ', ' ').replace(r'\\', '\\')
+        self.tprintln(unquoted)
 
     def do_history(self, rest):
         """history [filename]
@@ -583,7 +594,6 @@ class PBPShell(cmd.Cmd, object):
             except EnvironmentError, e:
                 pass
         try:
-            self._loaded_names = {}
             for name in globalns:
                 if name in globalns['__pbp__']:
                     self._loaded_names[name] = globalns[name]
