@@ -1,5 +1,7 @@
 	(unversioned yet) User-visible changes:
 	---------------------
+	* <meta refresh> tags that contain only a time and no url are
+	  parsed correctly instead of raising an exception.
 	* Buildbot: pbpstep.py runs only one .tests file, named on the command
 	  line.  This should be less surprising, and it gives more control (i.e.
 	  you can get separate boxes for different, unrelated tests in the

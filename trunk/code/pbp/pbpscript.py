@@ -169,7 +169,12 @@ class PBPShell(cmd.Cmd, object):
 
     def _parseRefresh(self, st):
         """Return time and url for a refresh header"""
-        refresh_time_s, urlblob = [s.strip() for s in st.split(';')]
+        refr_parts = st.split(';')
+        refresh_time_s = refr_parts.pop(0)
+        if refr_parts:
+            urlblob = refr_parts[0]
+        else:
+            urlblob = 'url='
         reftime = int(refresh_time_s)
         m = re.match('url\s*=(.*)', urlblob, re.I)
         if m and m.group(1):
