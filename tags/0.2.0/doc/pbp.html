@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+   <title>Python Browsing Probe (PBP)</title>
+  <link href="cory.css" type="text/css" rel="stylesheet" />
+  <!--[if IE]>
+    <style>
+    .menu { position: absolute; }
+    </style>
+    <![endif]-->
+ </head>
+ <body lang="en-US" xml:lang="en-US" dir="ltr">
+  <div class="menu">
+   <h4>Links
+   </h4>
+   <ul>
+     <li><a href="#downloads">Download it</a></li>
+     <li><a href="http://developer.berlios.de/projects/pbp">Berlios project
+       page</a></li>
+     <li><a
+       href="http://openfacts.berlios.de/index-en.phtml?title=Python%20Browsing%20Probe">The
+       Wiki</a></li>
+    <li><a href="http://twistedmatrix.com/">Twisted</a></li>
+     <li><a href="http://wwwsearch.sourceforge.net/">Projects related to mechanize</a></li>
+    <li><a href="http://www.a-a-p.org/">A-A-P</a></li>
+   </ul>
+  </div>
+  <div class="main">
+    <h1>Python Browsing Probe (PBP)</h1>
+    <h2>About</h2>
+    <p>PBP is a web test tool based on John J. Lee's <a
+      href="http://wwwsearch.sf.net">mechanize</a>. It exposes the browser
+    functionality at the level of a shell-like interpreter so that testers can
+    quickly write tests in a simple language designed specifically for that
+    purpose. Anyone familiar with a command line should be able to write test
+    scripts for even the most complex web applications with PBP.</p>
+    <p>More detail is available at the <a
+      href="http://openfacts.berlios.de/index-en.phtml?title=Python%20Browsing%20Probe">Wiki</a>.</p>
+    <h2>News</h2>
+    ...
+      <h2>How-To</h2>
+      <div class="code" style="width: 80ex;">
+        <pre>
+$ python pbpscript
+PBP&gt; go http://mailinator.com
+done at http://www.mailinator.com/mailinator/Welcome.do
+PBP&gt; code 200
+OK: code was 200
+PBP&gt; find "property of Outsc.*me"
+OK: found property of Outsc.*me
+PBP&gt; showform
+Form name=search
+## __Name______ __Type___ __ID________ __Value__________________
+   email        text      (None)       
+PBP&gt; formvalue search email pbp.berlios.de
+Set email in search to value pbp.berlios.de
+PBP&gt; submit search
+done at http://www.mailinator.com/mailinator/CheckMail.do
+PBP&gt; code 200
+OK: code was 200
+PBP&gt; find "no mensajes"
+*** ERROR ***
+Page http://www.mailinator.com/mailinator/CheckMail.do didn't match the search
+string: no mensajes
+PBP&gt; find "NO MESSAGES"
+OK: found NO MESSAGES
+PBP&gt; back
+OK, back at http://www.mailinator.com/mailinator/Welcome.do
+PBP&gt; history
+go http://mailinator.com
+code 200
+find "property of Outsc.*me"
+showform
+formvalue search email pbp.berlios.de
+submit search
+code 200
+find "no mensajes"
+find "NO MESSAGES"
+back
+history
+PBP&gt; history mylog.txt
+PBP&gt; quit
+Bye.
+</pre>
+      </div>
+   <h2>Prerequisites (Dependencies)
+   </h2><a name="prerequisites" id="prerequisites"></a>
+   <ul>
+    <li><a href="http://twistedmatrix.com/products/download">Download
+      Twisted</a></li>
+     <li><a href="http://wwwsearch.sourceforge.net/ClientCookie/#download">Download
+       ClientCookie</a> (version 0.9.4a or later required)</li>
+     <li><a href="http://wwwsearch.sourceforge.net/ClientForm/#download">Download
+       ClientForm</a>.  (SVN revision 4366 or later recommended but not
+     required.)</li>
+     <li><a href="http://wwwsearch.sourceforge.net/pullparser/#download">Download
+       pullparser</a></li>
+     <li><a href="http://wwwsearch.sourceforge.net/mechanize/#download">Download
+       mechanize</a></li>
+   </ul>
+   <p>Also, be aware that ClientCookie depends on having the Python bindings
+   for Berkeley DB installed.  Stock Python 2.3 comes with these, but not all
+   distributions of Python package them together.
+   <h2><a name="downloads" id="downloads"></a>Downloads
+   </h2>
+   <ul>
+    <li>
+    <p><a href="http://developer.berlios.de/project/showfiles.php?group_id=1744">PBP 0.1.0</a>
+     </p></li>
+   </ul>
+   <h2 class="c1">Source Code / SVN
+   </h2>
+   <p>To check out the source code for PBP:
+   </p>
+   <div class="code">
+$ svn co svn://svn.berlios.de/pbp/trunk pbp 
+   </div>
+   <p>You can use <a href="http://sourceforge.net/project/showfiles.php?group_id=46523">A-A-P</a>
+    to build packages from the included <tt>main.aap</tt> file.
+   </p>
+   <a href="http://developer.berlios.de" title="BerliOS Developer"> <img src="http://developer.berlios.de/bslogo.php?group_id=1744" width="124px" height="32px" border="0" alt="BerliOS Developer Logo"></a>
+  </div>
+ </body>
+</html>
