@@ -1,5 +1,7 @@
 	(unversioned yet) User-visible changes:
 	---------------------
+	* BatchThread's deferred errback will now contain the last PBPScriptError
+	  instance (tracker patch 268)
 	* Don't blow up when a submit takes you to a location with an error code.
 	* Put wwwsearch.zip first in sys.path so conflicting versions installed on
 	  the system already won't cause problems.
@@ -13,10 +15,13 @@
 	* --version prints something relevant.
 	* Name change "Python Browsing Probe" -> "Python Browser Poseur"
 	* New command: showlinks--print a nicely formatted list of the links on
-	  the page 
-	* New command: url--show or test the current URL as a regex
-	* New command: title--show or test the current <title> as a regex
-	* New command: reload--request a reload of the current page
+	  the page (tracker patch 192)
+	* New command: url--show or test the current URL as a regex (tracker patch
+	  192 and 267)
+	* New command: title--show or test the current <title> as a regex (tracker
+	  patch 192 and 267)
+	* New command: reload--request a reload of the current page (tracker patch
+	  192)
 	* Fixed a minor formatting problem in showform
 
 PBP (0.3.0)

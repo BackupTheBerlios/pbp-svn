@@ -743,7 +743,7 @@ class PBPShell(cmd.Cmd, object):
         try:
             name = args.pop(0)
         except IndexError:
-            raise PBPUsageError("do " + rest)
+            raise error.PBPUsageError("do " + rest)
         ret = self._resolvePyloadedName(name, *args)
         if ret is not None:
             self.tprintln(str(ret))
@@ -855,6 +855,7 @@ class BatchThread(threading.Thread):
         if self.cascade:
             self._more_scripts = 0
         self.waiting = 0
+        self.last_failure = failed
 
     def cb_scriptPassed(self, _dontcare, script):
         tprintln('SUCCESS: %s' % (script,))
@@ -896,8 +897,10 @@ class BatchThread(threading.Thread):
             # exit status (determined by calling callback or errback)
             # depends on whether any scripts failed
             if self.some_scripts_failed:
-                reactor.callFromThread(self.deferred.errback,
-                                       error.PBPScriptError())
+                e = getattr(self, 'last_failure', None)
+                if e is None:
+                    e = error.PBPScriptError()
+                reactor.callFromThread(self.deferred.errback, e)
             else:
                 reactor.callFromThread(self.deferred.callback, None)
         except Exception, e:
