@@ -1,9 +1,11 @@
 	User-visible changes:
 	---------------------
 	* echo command, for writing messages into the log file
-	* Strings that contain literal $ but are not defined variables will 
+	* Strings that begin with literal $ but are not defined variables will 
 	  be echoed literally instead of raising an AttributeError
-	* 
+	* Inputs with no name (such as submit buttons) do not cause 
+	  showform to break. Closes #1968 (thanks to ___) 
+
 PBP (0.2.2)
 	User-visible changes:
 	---------------------
@@ -11,10 +13,12 @@ PBP (0.2.2)
 	* ``fv'' is a synonym for ``formvalue''
 	* added buildbot directory with stuff for master and slave side
 	  of a buildbot.  See README.buildbot.
+
 PBP (0.2.1) 
 	User-visible changes: 
 	--------------------- 
 	* Unix will no longer hang when a script is done. (Closes bug 001903)
+
 PBP (0.2.0)
 	User-visible changes:
 	---------------------
@@ -33,6 +37,7 @@ PBP (0.2.0)
 	  for each script (they still share the same browser session and
 	  run in serial).
 	* Exception classses moved into their own module. 
+
 PBP (0.1.0)
 	* Initial release.
 -- Cory Dodt (corydodt@twistedmatrix.com)
