@@ -470,7 +470,7 @@ class PBPShell(cmd.Cmd, object):
         if formparts:
             submit = formparts[0]
         stopat = None
-        if args[1]:
+        if len(args) > 1:
             stopat = args[1]
 
 
