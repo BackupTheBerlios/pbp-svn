@@ -564,10 +564,10 @@ class PBPShell(cmd.Cmd, object):
 
     def do_submit(self, rest):
         """submit <form>[%submitspec] [stopat]
-        Use the name=value pairs to set the form fields, then
-        submit the form.  Otherwise behave like go (see help go for
+        Use the form values specified by 'formvalue' (or the defaults),
+        then submit the form.  And otherwise behave like go (see help go for
         details).
-        If submit is given, use it as an exact string to identify 
+        If submitspec is given, use it as an exact string to identify 
         the submit button (by name, type, or id in that order).
 
         To choose a form with a literal % in the name, type \%.
@@ -588,10 +588,16 @@ class PBPShell(cmd.Cmd, object):
         last_res_old = self.last_res
         last_err = None
         ident_map = dict(name=str, type=str, id=str, nr=lambda n: int(n)-1)
+        # process the %submitspec arg, if given, and click the right control
         if submit:
             for ident in ('name', 'type', 'id', 'nr'):
                 kwargs = {ident: ident_map[ident](submit)}
                 requester = lambda: self.browser.submit(**kwargs)
+                # mechanize doesn't provide an API to look for the control
+                # apart from trying to click it.  So click it (using journey)
+                # then catch the NotFound exception.  If we run out of
+                # different things to try, then it looks the control
+                # requested really wasn't there, so raise.
                 try:
                     self.journey(requester)
                 except ClientForm.ControlNotFoundError, e:
@@ -600,7 +606,7 @@ class PBPShell(cmd.Cmd, object):
             if self.last_res is last_res_old:
                 raise last_err
 
-        else:
+        else: # no submitspec, just click the default submit button
             self.journey(lambda : self.browser.submit())
          
         self.journeyAndRefresh(lambda: self.last_res, stopat)
@@ -613,10 +619,10 @@ class PBPShell(cmd.Cmd, object):
         (see help go for details).
 
         linkspec is one of url, text, name, tag.  If a number is
-        given after matchable_string, choose the NNN'th link matching that,
+        given after linkspec, choose the NNN'th link matching that,
         not the first one.  
         
-        To use a literal % in matchable_string, type \%.
+        To use a literal % in linkspec, type \%.
 
         Examples: 
             follow /courses/healthed    # a url
@@ -698,7 +704,10 @@ class PBPShell(cmd.Cmd, object):
 
 
     def do_do(self, rest):
-        """do <python_callable> [arguments...]"""
+        """do <python_callable> [arguments...]
+        Call Python code loaded with pyload.  Arguments will be passed to the
+        callable as function arguments.
+        """
         args = shlex_split(rest)
         try:
             name = args.pop(0)
