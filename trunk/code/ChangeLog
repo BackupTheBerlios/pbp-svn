@@ -14,8 +14,8 @@
 	* Name change "Python Browsing Probe" -> "Python Browser Poseur"
 	* New command: showlinks--print a nicely formatted list of the links on
 	  the page 
-	* New command: url--show or test the current URL
-	* New command: title--show or test the current <title>
+	* New command: url--show or test the current URL as a regex
+	* New command: title--show or test the current <title> as a regex
 	* New command: reload--request a reload of the current page
 	* Fixed a minor formatting problem in showform
 

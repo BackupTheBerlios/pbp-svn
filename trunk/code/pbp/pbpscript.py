@@ -200,7 +200,7 @@ class PBPShell(cmd.Cmd, object):
         if len(args) == 0:
             self.tprintln("The current URL is: %s" % (res,))
         else:
-            if res == args[0]:
+            if re.search(args[0], res):
                 self.tprintln("OK: url was %s" % (res,))
             else:
                 raise error.PBPScriptError("URL is %s but you expected %s" % (res, args[0]))
@@ -221,7 +221,7 @@ class PBPShell(cmd.Cmd, object):
         if len(args) == 0:
             self.tprintln("The current title is: '%s'" % (res,))
         else:
-            if res == args[0]:
+            if re.search(args[0], res):
                 self.tprintln("OK: title was '%s'" % (res,))
             else:
                 raise error.PBPScriptError("The title is '%s' but you expected '%s'" % (res, args[0]))
