@@ -1,12 +1,14 @@
 	User-visible changes:
 	---------------------
+	* 'agent' command lets testers set the user-agent string so PBP
+	  can impersonate a different browser.
 	* In batch mode, exit status >0 if at least one script does not succeed.
 	  This makes things like pbpscript in Makefiles work better.
-	* echo command, for writing messages into the log file
+	* 'echo' command, for writing messages into the log file
 	* Strings that begin with literal $ but are not defined variables will 
 	  be echoed literally instead of raising an AttributeError
 	* Inputs with no name (such as submit buttons) do not cause 
-	  showform to break. Closes #1968 (thanks to ___) 
+	  showform to break. Closes #1968 (thanks to Doug Winter's patch) 
 
 PBP (0.2.2)
 	User-visible changes:

@@ -23,6 +23,8 @@ Local Browser Access
 
 Misc
 ====
+    agent (ie5|ie55|ie6|moz17|opera7|konq32|aol9|saf11|<your own string>) -
+                         Change user-agent string
     echo <message> - Just write a message into the log.
     history [filename] - show the history of your commands, or write
                          it to a file.
@@ -105,7 +107,9 @@ class PBPShell(cmd.Cmd, object):
         # handle refresh and meta refresh with time 0
         self.browser.set_handle_equiv(ClientCookie.HTTPEquivProcessor)
         self.browser.set_handle_refresh(ClientCookie.HTTPRefreshProcessor)
-        # TODO - utidylib handler
+        # TODO - utidylib/BeautifulSoup handler
+        # TODO - self.browser.set_cookiejar and use bsddb cookies
+        # TODO - self.browser.set_credentials for http auth?
         self.last_res = None
         self.refresh_target = None
         self.refresh_time = -1
@@ -172,6 +176,28 @@ class PBPShell(cmd.Cmd, object):
         else:
             url = urlblob
         return reftime, url
+
+    def do_agent(self, rest):
+        """agent (ie5|ie55|ie6|moz17|opera7|konq32|aol9|saf11|<your own string>)
+        Change the User-agent header to pretend to be one of the above
+        browsers or any string you want.  ie5, moz17 etc. are shortcuts
+        for the full string for that browser.  (The shortcuts all
+        pretend to be Windows XP except for Konqueror and Safari; use your own
+        string if you want a different OS.)
+        """
+        agent_map = dict(
+                ie5='Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 5.1)',
+                ie55='Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.1)',
+                ie6='Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)',
+                moz17='Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7) Gecko/20040616',
+                opera7='Opera/7.0 (Windows NT 5.1; U) [en]',
+                kong32='Mozilla/5.0 (compatible; Konqueror/3.2.3; Linux 2.4.14; X11; i686)',
+                saf11='Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en-us) AppleWebKit/100 (KHTML, like Gecko) Safari/100',
+                aol9='Mozilla/4.0 (compatible; MSIE 5.5; AOL 9.0; Windows NT 5.1)',
+                         )
+        stripped = rest.strip()
+        agent = agent_map.get(stripped, stripped)
+        self.browser.set_persistent_headers([("User-agent", agent)])
 
     def do_echo(self, rest):
         """echo <message>
