@@ -77,6 +77,8 @@ def trunc(s, length, end=1):
     (length-4) characters and replacing them with ' ...'
     With end=0, truncate from the front instead.
     """
+    if not s:
+        return ''
     if len(s) > length:
         if end:
             return s[:-4] + '...'
