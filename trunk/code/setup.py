@@ -22,9 +22,10 @@ except EnvironmentError:
 
 setup_args = dict(name="pbp", author="Cory Dodt", 
                   author_email='corydodt@twistedmatrix.com',
-                  url='http://localhost/FIXME',
+                  url='http://pbp.berlios.de/',
                   version=version,
                   scripts=['pbpscript'], packages=['pbp'],
+                  console=['pbpscript'],
                   data_files = [('pbp', ['pbp/wwwsearch.zip',])],
                   cmdclass = dict(install_data = smart_install_data,
                                   ),
