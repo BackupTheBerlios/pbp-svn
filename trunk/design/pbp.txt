@@ -1,0 +1,58 @@
+INTERACTIVE AIDES
+-----------------
+show
+showform
+showlinks
+history [filename]
+pdb
+
+LOGGING TOOLS
+-------------
+echo <message>
+endtimer
+starttimer
+
+BROWSER BEHAVIOR CONFIGURATION
+------------------------------
+agent <constant-or-string>
+timeout <time>
+
+STATE
+-----
+require <state>
+provide <state>
+
+MISC?
+-----
+do <python-callable>
+pyload <filename>
+done
+... EOF
+... exit
+... quit
+
+CLIENT COMMANDS
+---------------
+formvalue <form> <field>[%NNN] <value>
+... fv
+
+NAVIGATION COMMANDS
+-------------------
+back
+reload
+go <url> [stopat]
+follow <linkspec>[%NNN] [stopat]
+submit <form>[%submitspec] [stopat]
+===> "request url <url> [until <stopat>]"
+===> "request link <linkspec> [#n] [until <stopat>]"
+===> "request submit <buttonspec> [#n] [until <stopat>]"
+
+TESTS
+-----
+code <NNN> [<NNN> ...]
+notfind <regex>
+find <regex>
+title <regex>
+url <regex>
+===> "test (url|text|title|code) [not] <regex>"
+
