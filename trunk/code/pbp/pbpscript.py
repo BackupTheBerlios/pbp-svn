@@ -189,7 +189,11 @@ class PBPShell(cmd.Cmd, object):
 
     def do_url(self, rest):
         """url [url]
-        Show the url of the current page or test if it's equal to the argument"""
+        Show the url of the current page or test if it's equal to the 
+        url argument, a regular expression.  Remember, if you want to write a
+        test to match http://foo.com/foo *NOT* http://foo.com/foo/bar, type
+        this: "url http://foo.com/foo$"
+        """
         args = self._getCountedArgs("url " + rest, 0, 1)
         try:
             res = self.browser.geturl()
