@@ -185,13 +185,15 @@ class PBPShell(cmd.Cmd, object):
         pretend to be Windows XP except for Konqueror and Safari; use your own
         string if you want a different OS.)
         """
+        if rest.strip() == '':
+            raise error.PBPUsageError('agent ' + rest)
         agent_map = dict(
                 ie5='Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 5.1)',
                 ie55='Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.1)',
                 ie6='Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)',
                 moz17='Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7) Gecko/20040616',
                 opera7='Opera/7.0 (Windows NT 5.1; U) [en]',
-                kong32='Mozilla/5.0 (compatible; Konqueror/3.2.3; Linux 2.4.14; X11; i686)',
+                konq32='Mozilla/5.0 (compatible; Konqueror/3.2.3; Linux 2.4.14; X11; i686)',
                 saf11='Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en-us) AppleWebKit/100 (KHTML, like Gecko) Safari/100',
                 aol9='Mozilla/4.0 (compatible; MSIE 5.5; AOL 9.0; Windows NT 5.1)',
                          )
