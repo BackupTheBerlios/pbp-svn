@@ -475,7 +475,7 @@ class PBPShell(cmd.Cmd, object):
         fieldfinder = self._smartFieldKey(fieldspec)
 
         ctl = self.browser.find_control(**fieldfinder)
-        if ctl.type in ['text', 'password', 'textarea']:
+        if ctl.type in ['text', 'password', 'textarea', 'hidden']:
             self.browser.set_value(value, **fieldfinder)
         elif ctl.type == 'checkbox':
             state = _parseBool(value)[0]
@@ -483,7 +483,7 @@ class PBPShell(cmd.Cmd, object):
         elif ctl.type in ['radio', 'select']:
             state, selection = _parseBool(value)
             self.browser.set(state, selection, **fieldfinder)
-        elif ctl.type in ['submit', 'image', 'hidden', 'reset']:
+        elif ctl.type in ['submit', 'image', 'reset']:
             return
         elif ctl.type == 'file':
             self.browser.add_file(open(value, 'r'), 

@@ -3,5 +3,5 @@
 @@ -39,3 +39,4 @@
  OutputDir=C:\cygwin\home\cory\svn\pbp\code
  [Icons]
- Name: "{group}\Uninstall Python Browsing Probe"; Filename: "{uninstallexe}"
+ Name: "{group}\Uninstall Python Browser Poseur"; Filename: "{uninstallexe}"
 +Name: "{group}\PBP Shell"; Filename: "{cmd}"; Parameters: "/c ""{app}\pbpscript.exe"""

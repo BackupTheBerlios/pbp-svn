@@ -23,7 +23,7 @@ pbp-$(version)-setup.exe: dist/pbpscript.exe pbp/wwwsearch.zip
         scr = inno.Script(package_version=_no.version, 
                           author='Cory Dodt',
                           name='pbp', 
-                          display_name='Python Browsing Probe'
+                          display_name='Python Browser Poseur'
                           )
         scr.collect('dist/', exclude_globs=['*.svn*', 'AAPDIR', 
                                                      'aapdir'])

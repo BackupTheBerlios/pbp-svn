@@ -1,5 +1,5 @@
 
-                          Python Browsing Probe (PBP)
+                          Python Browser Poseur (PBP)
 
 About
 
