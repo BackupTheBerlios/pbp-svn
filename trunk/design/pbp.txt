@@ -35,6 +35,10 @@ CLIENT COMMANDS
 ---------------
 formvalue <form> <field>[%NNN] <value>
 ... fv
+setfield <fieldspec> [in <formspec>] <value> [on|off]
+... sf
+==> fieldspec: id|name|type[:number]
+==> formspec: id|name[:number]
 
 NAVIGATION COMMANDS
 -------------------
@@ -44,8 +48,11 @@ go <url> [stopat]
 follow <linkspec>[%NNN] [stopat]
 submit <form>[%submitspec] [stopat]
 ===> "request url <url> [until <stopat>]"
-===> "request link <linkspec> [#n] [until <stopat>]"
-===> "request submit <buttonspec> [#n] [until <stopat>]"
+===> "request link <linkspec> [until <stopat>]"
+===> "request submit <fieldspec> [in <formspec>] [until <stopat>]"
+==> url: [http://<server>]<path>
+==> linkspec: <id-regex>|<visible-regex>|<url-regex>[:number]
+==> fieldspec: id|name|type[:number]
 
 TESTS
 -----
@@ -55,4 +62,6 @@ find <regex>
 title <regex>
 url <regex>
 ===> "test (url|text|title|code) [not] <regex>"
+===> "test field <fieldspec> [in <formspec>] [not] <regex>"
+==> fieldspec: id|name|type[:number]
 
