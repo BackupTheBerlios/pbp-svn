@@ -872,6 +872,11 @@ class PBPOptions(usage.Options):
 If any one script fails, the remaining scripts will not run and will report
 failure.'''],
                 ]
+    def opt_version(self):
+        from pbp.version import version
+        print "PBP Version: %s" % (version,)
+        usage.Options.opt_version(self)
+    
     def parseArgs(self, *scripts):
         self['scripts'] = scripts 
 
