@@ -59,6 +59,8 @@ import threading
 import cmd, shlex, re
 import fnmatch
 
+sys.path.append(util.sibpath(__file__, 'wwwsearch.zip'))
+
 import urllib2, mechanize, ClientCookie, ClientForm
 
 # sibling
