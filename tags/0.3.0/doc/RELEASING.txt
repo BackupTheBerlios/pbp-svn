@@ -17,4 +17,3 @@ Notes for me.. Things I do when I release
 15. upload pbp.html to http://pbp.berlios.de
 16. news item on berlios project
 17. notify freshmeat.net
-18. notify wwwsearch-general (?)
