@@ -102,6 +102,7 @@ class PBPShell(cmd.Cmd, object):
         self.stored_time = -1
         self.canfail = canfail  # canfail=1 to make exceptions end loop 
         self.history = []
+        self.filename = "<interactive>"
         cmd.Cmd.__init__(self)
 
     def journey(self, browsemethod):
@@ -184,12 +185,13 @@ class PBPShell(cmd.Cmd, object):
         caused by a bug in your application.  Should be the first thing 
         in your script; default is 300 (5 minutes).  Contrast to endtimer.
         """
-        newtime = int(shlex_split(rest)[0])
+        args = self._getCountedArgs("timeout " + rest, 1)
+        newtime = int(args[0])
         tprintln('new timeout %s' % (newtime,))
         raise NewTimeout(newtime)
 
     def do_code(self, rest):
-        """code <NNN> [<NNN> [<NNN> ...]]
+        """code [<NNN> [<NNN> ...]]
         <NNN> can be a number like 404, or it can be a pattern like 40* or 4*
         """
         actual = str(self.last_code)
@@ -208,8 +210,9 @@ class PBPShell(cmd.Cmd, object):
         Look for <regex> in the response data, give an error if the string
         isn't found.
         """
+        args = self._getCountedArgs("find " + rest, 1)
         data = self._extractResponseData()
-        searchst = shlex_split(rest)[0]
+        searchst = args[0]
         if re.search(searchst, data, re.I):
             tprintln('OK: found %s' % (searchst,))
             return
@@ -221,8 +224,9 @@ class PBPShell(cmd.Cmd, object):
         *is* found.  
         (Inverse of the find command)
         """
+        args = self._getCountedArgs("notfind " + rest, 1)
         data = self._extractResponseData()
-        searchst = shlex_split(rest)[0]
+        searchst = args[0]
         if not re.search(searchst, data, re.I):
             tprintln('OK: page didn\'t contain %s' % (searchst,))
             return
@@ -268,7 +272,7 @@ class PBPShell(cmd.Cmd, object):
         If the link never reaches a page containing stopat, give
         an error like find (help find for details).
         """
-        args = shlex_split(rest)
+        args = self._getCountedArgs("go " + rest, 1, 2)
         stopat = None
         if len(args) > 1:
             stopat = args[1]
@@ -375,6 +379,16 @@ class PBPShell(cmd.Cmd, object):
                 continue
         raise last_err
 
+    def _getCountedArgs(self, command, count, optional_count=None):
+        """Raise a PBPUsageError unless the number of args is either 
+        count or optional_count.  Return a list of args.
+        """
+        if optional_count is None: optional_count == count
+
+        args = shlex_split(command)[1:]
+        if len(args) not in (count, optional_count):
+            raise error.PBPUsageError(command)
+        return args
 
     def do_formvalue(self, rest):
         """formvalue <form> <field>[%NNN] <value>
@@ -403,15 +417,10 @@ class PBPShell(cmd.Cmd, object):
             formvalue choosecourse preferred_teachers +"Mrs. Brunswick"
             formvalue choosecourse preferred_teachers +"Mr. Wiggedywack"
         """
-        args = shlex_split(rest)
-        try:
-            formname = args.pop(0)
-            fieldspec = args.pop(0)
-        except IndexError:
-            raise error.PBPUsageError("formvalue " + rest)
+        args = self._getCountedArgs("follow " + rest, 3)
+        formname = args.pop(0)
+        fieldspec = args.pop(0)
         value = ' '.join(args)
-        if not value:
-            raise error.PBPUsageError("formvalue " + rest)
 
         self._pickForm(formname)
 
@@ -450,7 +459,7 @@ class PBPShell(cmd.Cmd, object):
 
         To choose a form with a literal % in the name, type \%.
         """
-        args = shlex_split(rest)
+        args = self._getCountedArgs("submit " + rest, 1, 2)
         formparts = _unPercent(args[0])
         formname = formparts.pop(0)
         submit = None
@@ -501,7 +510,7 @@ class PBPShell(cmd.Cmd, object):
                                         # keep following redirects until
                                         # a page with "loginform" is found.
         """
-        args = shlex_split(rest)
+        args = self._getCountedArgs("follow " + rest, 1, 2)
         matchparts = _unPercent(args.pop(0))
         matchable = matchparts.pop(0)
         nth = 0
@@ -540,14 +549,61 @@ class PBPShell(cmd.Cmd, object):
         self.journeyAndRefresh(lambda : self.browser.follow_link(**kwargs), 
                                stopat)
 
+    def abort(self, reason):
+        """Abort the current script, with the reason given"""
+        self.deferred.errback(reason)
+
 
     def do_pyload(self, rest):
-        """pyload <filename>"""
-        tprintln("load some python TODO")
+        """pyload <filename>
+        Load <filename> by searching first in the same directory as
+        the running script, then by searching in the current working
+        directory.  The file should contain a variable named __pbp__
+        which is a list of the names to make available to the pbp
+        interpreter.
+        """
+        args = self._getCountedArgs("pyload " + rest, 1)
+        fn = args[0]
+        localns = {'PBP': self}
+        tprintln("Loading file %s" % (fn,))
+        for _f in (util.sibpath(self.filename, fn), fn):
+            try:
+                last_err = None
+                execfile(_f, {}, localns)
+                break
+            except EnvironmentError, e:
+                pass
+        try:
+            self._loaded_names = {}
+            for name in localns:
+                if name in localns['__pbp__']:
+                    self._loaded_names[name] = localns[name]
+        except KeyError:
+            raise error.FailedPyloadError(fn)
+
 
     def do_do(self, rest):
-        """do <python_callable> [arguments]"""
-        tprintln("do some python stuff TODO")
+        """do <python_callable> [arguments...]"""
+        args = shlex_split(rest)
+        try:
+            name = args.pop(0)
+        except IndexError:
+            raise PBPUsageError("do " + rest)
+        ret = self._resolvePyloadedName(name, *args)
+        if ret is not None:
+            tprintln(str(ret))
+
+    def _resolvePyloadedName(self, name, *args):
+        """Return the str of either the obj or the result of calling
+        the obj.
+        """
+        obj = self._loaded_names[name]
+        if callable(obj):
+            ret = obj(*args)
+        else:
+            ret = obj
+        return ret
+
 
     def _extractResponseData(self):
         if not self.last_res:
@@ -567,6 +623,15 @@ class PBPShell(cmd.Cmd, object):
     def onecmd(self, line):
         try:
             self.history.append(line)
+            # resolve $ strings in line
+            args = shlex_split(line)
+            for n, a in enumerate(args[:]):
+                if a.startswith('$'):
+                    try:
+                        args[n] = self._resolvePyloadedName(a[1:])
+                    except KeyError:
+                        pass # args[n] will be a string beginning with $
+            line = ' '.join([s.replace(' ', r'\ ') for s in args])
             return cmd.Cmd.onecmd(self, line)
         except (SystemExit, NewTimeout), e:
             raise
@@ -701,6 +766,7 @@ class ScriptThread(threading.Thread):
         self.deferred = deferred
         self.script = script
         self.shell = shell
+        self.shell.filename = self.script
         self.message_queue = message_queue
         self.keepgoing = 1 # set to 0 from parent thread to stop
         threading.Thread.__init__(self)

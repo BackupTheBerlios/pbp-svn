@@ -23,6 +23,13 @@ webinteraction_errors = (PBPScriptError,
                          _mz.LinkNotFoundError,
                          )
 
+class FailedPyloadError(PBPScriptError):
+    def __init__(self, filename):
+        self.filename = filename
+    def __str__(self):
+        t = "%s was not found or did not contain a variable named __pbp__"
+        return t % (self.filename,)
+
 class NoResponseError(PBPScriptError):
     """An attempt to access the last_res failed because no response
     has been seen from the server
@@ -95,7 +102,7 @@ class PBPUsageError(PBPScriptError):
         self.command = command
     def __str__(self):
         fullcmd = self.command
-        shortcmd = shlex_split(self.command)[0]
+        shortcmd = fullcmd.split(' ', 1)[0]
         return "This command failed: %s (try help %s)" % (fullcmd, shortcmd)
 
     __repr__ = __str__

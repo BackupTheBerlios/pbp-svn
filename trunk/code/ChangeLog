@@ -1,6 +1,9 @@
 PBP (0.2.0)
     User-visible changes:
     ---------------------
+    * pyload/do.  You can pyload a python file that defines __pbp__, and names
+      in __pbp__ will be visible in the pbp interpreter using the do command
+      or by referencing them as strings with $name.
     * Timeout command now works.  It times out the entire browser
       session; so in a command like this:
       $ pbpscript script1.pbp script2.pbp script3.pbp
