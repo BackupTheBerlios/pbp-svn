@@ -2,7 +2,10 @@
 @execfile('pbp/version.py', globs)
 :syseval svnversion . | :assign revision
 shortver = `globs['version']`
-version = $(shortver)+r$(revision)
+@if _no.version.endswith('+'):
+    version = $(shortver)+r$(revision)
+@else:
+    version = $(shortver)
 @from twisted.python import util
 @import inno
 ISCC = `util.sibpath(inno.__file__, 'program/ISCC.exe')`
