@@ -1,0 +1,4 @@
+from pbp import pbpscript
+
+if __name__ == '__main__':
+    pbpscript.run()

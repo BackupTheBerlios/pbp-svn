@@ -1,0 +1,26 @@
+@globs = {}
+@execfile('pbp/version.py', globs)
+:syseval svnversion . | :assign revision
+version = `globs['version']`+r$(revision)
+
+all: pbp-$(version)-setup.exe
+    :print : Done with all.
+
+pbp-$(version)-setup.exe: dist/pbpscript/pbpscript.exe
+    :python
+        import inno
+        scr = inno.Script(package_version=_no.version, 
+                          author='Cory Dodt',
+                          name='pbp', 
+                          display_name='Python Browsing Probe'
+                          )
+        scr.collect('dist/pbpscript')
+        scr.writeScript(open('pbp.iss', 'w'))
+
+    :sys patch -p0 < patch.diff  # add the icon
+
+    :python 
+        scr.compile()
+
+dist/pbpscript/pbpscript.exe:
+    :sys python setup.py py2exe

@@ -1,0 +1,7 @@
+--- pbp-0.iss	Thu May 06 14:43:44 2004
++++ pbp.iss	Thu May 06 14:45:38 2004
+@@ -26,3 +26,4 @@
+ OutputDir=C:\cygwin\home\cory\svn\pbp\code
+ [Icons]
+ Name: "{group}\Uninstall Python Browsing Probe"; Filename: "{uninstallexe}"
++Name: "{group}\PBP Shell"; Filename: "{cmd}"; Parameters: "/c ""{app}\pbpscript.exe"""
