@@ -17,14 +17,6 @@ Prerequisites (Dependencies)
 
      * Download Twisted
 http://twistedmatrix.com/products/download
-     * Download ClientCookie
-http://wwwsearch.sf.net/ClientCookie/#download
-     * Download ClientForm
-http://wwwsearch.sf.net/ClientForm/#download
-     * Download pullparser
-http://wwwsearch.sf.net/pullparser/#download
-     * Download mechanize
-http://wwwsearch.sf.net/mechanize/#download
 
 Installing:
 
