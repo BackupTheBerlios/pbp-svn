@@ -10,7 +10,7 @@ class PBP(step.ShellCommand):
     def __init__(self, directory=None, **kwargs):
         if not directory:
             raise TypeError("please pass testdir")
-        command = "bash run_pbpscript %s" % (directory,)
+        command = "bash run_pbpscript.bash %s" % (directory,)
         step.ShellCommand.__init__(self, command=command, **kwargs)
 
     def startStatus(self):
