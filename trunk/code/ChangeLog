@@ -1,8 +1,10 @@
     User-visible changes:
     ---------------------
     * The [stopat] argument of the submit command is used, not ignored.
-PBP (0.2.1) 
     * ``fv'' is a synonym for ``formvalue''
+    * added buildbot directory with stuff for master and slave side
+      of a buildbot.  See README.buildbot.
+PBP (0.2.1) 
     User-visible changes: 
     --------------------- 
     * Unix will no longer hang when a script is done. (Closes bug 001903)
