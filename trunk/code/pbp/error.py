@@ -62,10 +62,14 @@ class NoCodeMatchError(PBPScriptError):
         self.response = response
         self.code = code
     def __str__(self):
+        try:
+            url = self.response.wrapped.url
+        except:
+            url = "(url inaccessible)"
         if self.response:
             t = "\
 Page %(url)s came back with code %(code)s but you expected %(expected)s"
-            return t % dict(url=self.response.wrapped.url, code=self.code,
+            return t % dict(url=url, code=self.code,
                             expected=self.expected) 
         else:
             t = "Server error code was %(code)s but you expected %(expected)s"
