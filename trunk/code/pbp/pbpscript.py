@@ -564,7 +564,7 @@ class PBPShell(cmd.Cmd, object):
             formvalue choosecourse preferred_teachers +"Mrs. Brunswick"
             formvalue choosecourse preferred_teachers +"Mr. Wiggedywack"
         """
-        args = self._getCountedArgs("follow " + rest, 3)
+        args = self._getCountedArgs("formvalue " + rest, 3)
         formname = args.pop(0)
         fieldspec = args.pop(0)
         value = ' '.join(args)
