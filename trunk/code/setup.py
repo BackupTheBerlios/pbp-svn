@@ -1,5 +1,8 @@
 from distutils.core import setup
-import py2exe
+try:
+    import py2exe
+except ImportError:
+    pass
 
 globs = {}
 execfile('pbp/version.py', globs)
