@@ -161,7 +161,8 @@ class PBPShell(cmd.Cmd, object):
                 except error.NoResponseError:
                     return
                 if re.search(stopat, last_data, re.I): 
-                    self.tprintln('found expr in page %s'%(self.last_res.wrapped.url,))
+                    _url = self.last_res.wrapped.url
+                    self.tprintln('found expr in page', _url)
                     return
                 if self.refresh_time > 0:
                     time.sleep(self.refresh_time)
@@ -953,7 +954,7 @@ class ScriptThread(threading.Thread):
 
     def run(self):
         try:
-            for command in file(self.script, 'r'):
+            for command in openScript(self.script):
                 if self.keepgoing:
                     try:
                         self.shell.onecmd(command)
@@ -1019,3 +1020,8 @@ def run(argv=sys.argv):
     if getattr(batch, 'some_scripts_failed', False):
         sys.exit(1)
 
+def openScript(scriptname):
+    """An alias for file() that can easily be monkeypatched out for unit
+    tests
+    """
+    return file(scriptname, 'r')
