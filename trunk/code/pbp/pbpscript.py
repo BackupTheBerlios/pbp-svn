@@ -303,7 +303,7 @@ class PBPShell(cmd.Cmd, object):
         """Quit"""
         print 'Bye.'
         sys.exit(0)
-    do_exit = do_quit = do_done = do_EOF
+    do_EOF = do_exit = do_quit = do_done
 
     def _pickForm(self, formspec):
         """Set the current form to one found with formspec"""
