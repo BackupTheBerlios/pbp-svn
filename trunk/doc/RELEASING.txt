@@ -4,18 +4,17 @@ Notes for me.. Things I do when I release
 2. Make sure version string is at the top of the ChangeLog.
 3. Make sure pbp/version.py has the correct version tuple.
 4. See if README needs to have any language changed.
-5. (tests)
-6. svn up from the root and commit or revert all changes
-7. Copy the blessed revision to a tag
-8. svn switch to the tag (on windows and unix)
-9. build release files on Windows: $ aap 
-10. build release files on Unix: $ python setup.py sdist
-11. upload pbp-*-setup.exe, pbp-*.zip and pbp-*.tar.gz to berlios
-12. do the file release dance on berlios (hey, make a pbp script for this :)
-13. update doc/pbp.html including several version strings and download uri
-14. update Wiki as above
+5. update doc/pbp.html including several version strings and download uri
+6. (tests)
+7. svn up from the root and commit or revert all changes
+8. Copy the blessed revision to a tag
+9. svn switch to the tag (on windows and unix)
+10. build release files on Windows: $ aap 
+11. build release files on Unix: $ python setup.py sdist
+12. upload pbp-*-setup.exe, pbp-*.zip and pbp-*.tar.gz to berlios
+13. do the file release dance on berlios (hey, make a pbp script for this :)
+14. update Wiki same as #5
 15. upload pbp.html to http://pbp.berlios.de
 16. news item on berlios project
 17. notify freshmeat.net
 18. notify pbp mailing list
-19. (svn switch back to trunk on windows and unix)
