@@ -386,7 +386,10 @@ class PBPShell(cmd.Cmd, object):
 
     def do_pdb(self, rest):
         """debugger"""
-        import pdb; pdb.set_trace()
+        try:
+            import pdb; pdb.set_trace()
+        except:  # normally I wouldn't do this, but caveat debugger eh?
+            pass
 
     def do_showform(self, rest):
         """Summarize the forms on the page"""
