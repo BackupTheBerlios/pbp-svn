@@ -56,6 +56,7 @@ from twisted.python import threadable, log, failure, usage, util
 threadable.init(1)
 from twisted.internet import reactor, defer, threads
 
+import sets
 import sys
 import time, Queue
 import mimetypes
@@ -83,8 +84,8 @@ def trunc(s, length, end=1):
         return ''
     if len(s) > length:
         if end:
-            return s[:-4] + '...'
-        return '...' + s[4:]
+            return s[:length-4] + ' ...'
+        return '... ' + s[len(s)-length+4:]
     return s
 
 
@@ -400,6 +401,8 @@ class PBPShell(cmd.Cmd, object):
                 self.tprintln("Form # %s" % (n+1))
             if f.controls:
                 self.tprintln("## __Name______ __Type___ __ID________ __Value__________________")
+            # sets would make this more readable, but sets don't preserve
+            # the order.  Keeping them in order helps readability.
             clickies = [c for c in f.controls if c.is_of_kind('clickable')]
             nonclickies = [c for c in f.controls if c not in clickies]
             for field in nonclickies:
