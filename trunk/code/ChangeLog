@@ -1,5 +1,7 @@
 	User-visible changes:
 	---------------------
+	* In batch mode, exit status >0 if at least one script does not succeed.
+	  This makes things like pbpscript in Makefiles work better.
 	* echo command, for writing messages into the log file
 	* Strings that begin with literal $ but are not defined variables will 
 	  be echoed literally instead of raising an AttributeError
