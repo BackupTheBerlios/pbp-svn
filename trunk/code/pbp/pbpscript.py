@@ -88,6 +88,8 @@ class NewTimeout(Exception):
 
 class PBPShell(cmd.Cmd, object):
     prompt = 'PBP> '
+    def tprintln(self, *args):
+        self.stdout.write(' '.join([str(a) for a in args]) + '\n')
 
     def __init__(self, canfail=0):
         self.browser = mechanize.Browser()
@@ -116,7 +118,7 @@ class PBPShell(cmd.Cmd, object):
             self.last_res = browsemethod()
             self.last_code = self.last_res.wrapped.code
         except urllib2.HTTPError, e:
-            tprintln(e)
+            self.tprintln(e)
             self.last_res = None
             self.last_code = e.code
             return
@@ -131,7 +133,7 @@ class PBPShell(cmd.Cmd, object):
             if not self.last_res:
                 return
             if stopat is None:
-                tprintln('done at %s' % (self.last_res.wrapped.url))
+                self.tprintln('done at %s' % (self.last_res.wrapped.url))
                 return
             else:
                 try:
@@ -139,7 +141,7 @@ class PBPShell(cmd.Cmd, object):
                 except error.NoResponseError:
                     return
                 if re.search(stopat, last_data, re.I): 
-                    tprintln('found expr in page %s'%(self.last_res.wrapped.url,))
+                    self.tprintln('found expr in page %s'%(self.last_res.wrapped.url,))
                     return
                 if self.refresh_time > 0:
                     time.sleep(self.refresh_time)
@@ -171,9 +173,9 @@ class PBPShell(cmd.Cmd, object):
             fn = args[0]
             file(fn, 'w').write(history)
         else:
-            tprintln("### Begin history ###")
-            tprintln(history)
-            tprintln("### End history ###")
+            self.tprintln("### Begin history ###")
+            self.tprintln(history)
+            self.tprintln("### End history ###")
 
     def do_timeout(self, rest):
         """timeout <time>
@@ -187,7 +189,7 @@ class PBPShell(cmd.Cmd, object):
         """
         args = self._getCountedArgs("timeout " + rest, 1)
         newtime = int(args[0])
-        tprintln('new timeout %s' % (newtime,))
+        self.tprintln('new timeout %s' % (newtime,))
         raise NewTimeout(newtime)
 
     def do_code(self, rest):
@@ -197,11 +199,11 @@ class PBPShell(cmd.Cmd, object):
         actual = str(self.last_code)
         codes = shlex_split(rest)
         if not codes:
-            tprintln(self.last_code)
+            self.tprintln(self.last_code)
             return
         for expected in codes:
             if fnmatch.fnmatch(actual, expected):
-                tprintln('OK: code was %s' % (actual,))
+                self.tprintln('OK: code was %s' % (actual,))
                 return
         raise error.NoCodeMatchError(expected, self.last_res, self.last_code)
     
@@ -214,7 +216,7 @@ class PBPShell(cmd.Cmd, object):
         data = self._extractResponseData()
         searchst = args[0]
         if re.search(searchst, data, re.I):
-            tprintln('OK: found %s' % (searchst,))
+            self.tprintln('OK: found %s' % (searchst,))
             return
         raise error.DataNotFoundError(searchst, self.last_res)
 
@@ -228,7 +230,7 @@ class PBPShell(cmd.Cmd, object):
         data = self._extractResponseData()
         searchst = args[0]
         if not re.search(searchst, data, re.I):
-            tprintln('OK: page didn\'t contain %s' % (searchst,))
+            self.tprintln('OK: page didn\'t contain %s' % (searchst,))
             return
         raise error.DataFoundInappropriatelyError(searchst, self.last_res)
 
@@ -237,12 +239,12 @@ class PBPShell(cmd.Cmd, object):
         res = self.browser.back()
         self.last_res = res
         self.last_code = res.wrapped.code
-        tprintln("OK, back at %s" % (res.wrapped.url,))
+        self.tprintln("OK, back at %s" % (res.wrapped.url,))
     
     def do_starttimer(self, rest):
         """Start timer - use endtimer later to get the time elapsed"""
         self.stored_time = time.time()
-        tprintln("Started the timer.")
+        self.tprintln("Started the timer.")
     
     def do_endtimer(self, rest):
         """endtimer [max]
@@ -261,7 +263,7 @@ class PBPShell(cmd.Cmd, object):
         elapsed = time.time() - self.stored_time
         if elapsed > expected:
             raise error.TimedOutError(expected, elapsed)
-        tprintln("%0.2f seconds elapsed" % (elapsed,))
+        self.tprintln("%0.2f seconds elapsed" % (elapsed,))
 
         self.stored_time = -1
     
@@ -287,11 +289,11 @@ class PBPShell(cmd.Cmd, object):
         """Summarize the forms on the page"""
         for n,f in enumerate(self.browser.forms()):
             if f.name:
-                tprintln("Form name=%s" % (f.name))
+                self.tprintln("Form name=%s" % (f.name))
             else:
-                tprintln("Form # %s" % (n+1))
+                self.tprintln("Form # %s" % (n+1))
             if f.controls:
-                tprintln("## __Name______ __Type___ __ID________ __Value__________________")
+                self.tprintln("## __Name______ __Type___ __ID________ __Value__________________")
             clickies = [c for c in f.controls if c.is_of_kind('clickable')]
             nonclickies = [c for c in f.controls if c not in clickies]
             for field in nonclickies:
@@ -306,7 +308,7 @@ class PBPShell(cmd.Cmd, object):
                            "%-12s" % (trunc(field.id or "(None)", 12),),
                            value_displayed,
                            )
-                tprintln(*strings)
+                self.tprintln(*strings)
             for n, field in enumerate(clickies):
                 strings = ("%-2s" % (n+1,),
                            "%-12s %-9s" % (trunc(field.name, 12),
@@ -314,16 +316,16 @@ class PBPShell(cmd.Cmd, object):
                            "%-12s" % (trunc(field.id or "(None)", 12),),
                            field.value,
                            )
-                tprintln(*strings)
+                self.tprintln(*strings)
             
     def do_show(self, rest):
         """Show the data in the last http response.
         """
-        tprintln(self._extractResponseData())
+        self.tprintln(self._extractResponseData())
 
     def do_done(self, rest):
         """Quit"""
-        tprintln('Bye.')
+        self.tprintln('Bye.')
         sys.exit(0)
     do_EOF = do_exit = do_quit = do_done
 
@@ -446,7 +448,7 @@ class PBPShell(cmd.Cmd, object):
             if k != 'nr':
                 fieldname = fieldfinder[k]
                 break
-        tprintln("Set %s in %s to value %s" % (fieldname, formname, value))
+        self.tprintln("Set %s in %s to value %s" % (fieldname, formname, value))
 
 
     def do_submit(self, rest):
@@ -543,7 +545,7 @@ class PBPShell(cmd.Cmd, object):
                 last_err = e
                 continue
         if not thelink:
-            tprintln("oops!  couldn't find any link like %s" % (matchable,))
+            self.tprintln("oops!  couldn't find any link like %s" % (matchable,))
             raise last_err
 
         self.journeyAndRefresh(lambda : self.browser.follow_link(**kwargs), 
@@ -565,7 +567,7 @@ class PBPShell(cmd.Cmd, object):
         args = self._getCountedArgs("pyload " + rest, 1)
         fn = args[0]
         localns = {'PBP': self}
-        tprintln("Loading file %s" % (fn,))
+        self.tprintln("Loading file %s" % (fn,))
         for _f in (util.sibpath(self.filename, fn), fn):
             try:
                 last_err = None
@@ -591,7 +593,7 @@ class PBPShell(cmd.Cmd, object):
             raise PBPUsageError("do " + rest)
         ret = self._resolvePyloadedName(name, *args)
         if ret is not None:
-            tprintln(str(ret))
+            self.tprintln(str(ret))
 
     def _resolvePyloadedName(self, name, *args):
         """Return the str of either the obj or the result of calling
@@ -636,12 +638,12 @@ class PBPShell(cmd.Cmd, object):
         except (SystemExit, NewTimeout), e:
             raise
         except error.PBPScriptError, e:
-            tprintln("*** ERROR ***")
-            tprintln(e)
+            self.tprintln("*** ERROR ***")
+            self.tprintln(e)
             if self.canfail:
                 raise
         except Exception, e:
-            tprintln("*** ERROR ***")
+            self.tprintln("*** ERROR ***")
             log.err()
             if self.canfail:
                 raise
