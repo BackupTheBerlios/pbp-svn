@@ -1,3 +1,4 @@
+PBP (0.3.0)
 	User-visible changes:
 	---------------------
 	* 'agent' command lets testers set the user-agent string so PBP
