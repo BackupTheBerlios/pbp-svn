@@ -1,15 +1,20 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:n='http://nevow.com/ns/nevow/0.1'>
  <head>
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
    <title>Python Browser Poseur (PBP)</title>
-  <link href="cory.css" type="text/css" rel="stylesheet" />
-  <!--[if IE]>
-    <style>
-    .menu { position: absolute; }
-    </style>
-    <![endif]-->
+   <!--
+   <link rel='alternate' type='application/rss+xml' href='pbp.xml' />
+   -->
+   <link rel="stylesheet" type="text/css" href="cory.css" />
+   <!--[if IE]>
+     <style>
+     .menu { position: absolute; }
+     </style>
+   <![endif]-->
  </head>
  <body lang="en-US" xml:lang="en-US" dir="ltr">
   <div class="menu">
@@ -39,43 +44,15 @@
     scripts for even the most complex web applications with PBP.</p>
     <p>More detail is available at the <a
       href="http://openfacts.berlios.de/index-en.phtml?title=Python%20Browser%20Poseur">Wiki</a>.</p>
+
+
     <h2>News</h2>
-    <p class='datetime'>2004-07-24T00:44-0700</p>
-    <h3>Minor Project Name Change</h3>
-    <p>PBP now stands for "Python Browser Poseur" instead of "Python Browsing
-    Probe."  I was getting a lot of porn referrals with the other name.  Don't
-    ask.  Links to everything but the first page of the Wiki will still work;
-    for that one link, use the Wiki link on this page as your new bookmark.
-    </p>
-    <p class='datetime'>2004-07-05T18:22-0700</p>
-    <h3>0.3.0 Important Feature Release</h3>
-    <p>Major changes are: a command to let testers set the user-agent string
-    and impersonate a different browser, an 'echo' command for writing text
-    into the output, well-behaved shell exit status (&gt;0 if there's a script
-    error), and bugs fixed.
-    </p>
+    <n:invisible n:render='news' />
 
 
-    <p class='datetime'>2004-05-21T12:44-0700</p>
-    <h3>0.2.2 Minor Feature Update Release</h3>
-    <p>Fixed an important bug in the submit command, and added support for the
-    buildbot (see <a href="http://buildbot.sf.net">the Buildbot site</a>
-    and README.buildbot in Buildbot directory).</p>
-
-    <p>In addition, this release bundles mechanize and its components into the
-    distribution package!  The tarball and zip file both contain these
-    components, while the setup.exe has always contained them.  This makes
-    installing it from source easier.</p>
-
-    <p class='datetime'>2004-05-17T12:09-0700</p>
-    <h3>0.2.1 Bugfix Release</h3>
-    <p>This release fixes various places where the threaded implementation
-    would refuse to quit on Unix platforms; scripts will now exit properly
-    there.
-    </p>
-      <h2>How-To</h2>
-      <div class="code" style="width: 80ex;">
-        <pre>
+    <h2>How-To</h2>
+    <div class="code" style="width: 80ex;">
+      <pre>
 $ python pbpscript
 PBP&gt; go http://mailinator.com
 done at http://www.mailinator.com/mailinator/Welcome.do
@@ -128,7 +105,9 @@ Bye.
    </h2>
    <ul>
     <li>
-    <p><a href="http://developer.berlios.de/project/showfiles.php?group_id=1744">PBP 0.3.0</a>
+    <p n:render='download'><a
+      href="http://developer.berlios.de/project/showfiles.php?group_id=1744">PBP
+      <n:slot name='latest' /></a>
      </p></li>
    </ul>
    <h2 class="c1">Source Code / SVN

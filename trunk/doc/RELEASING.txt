@@ -4,17 +4,19 @@ Notes for me.. Things I do when I release
 2. Make sure version string is at the top of the ChangeLog.
 3. Make sure pbp/version.py has the correct version tuple.
 4. See if README needs to have any language changed.
-5. update doc/pbp.html including several version strings and download uri
-6. (tests)
-7. svn up from the root and commit or revert all changes
-8. Copy the blessed revision to a tag
-9. svn switch to the tag (on windows and unix)
-10. build release files on Windows: $ aap 
-11. build release files on Unix: $ python setup.py sdist
-12. upload pbp-*-setup.exe, pbp-*.zip and pbp-*.tar.gz to berlios
-13. do the file release dance on berlios (hey, make a pbp script for this :)
-14. update Wiki same as #5
-15. upload pbp.html to http://pbp.berlios.de
-16. news item on berlios project
-17. notify freshmeat.net
-18. notify pbp mailing list
+5. Update doc/news.yml - add a news item and change value of release
+6. Update doc/pbp.html by running news2yaml news.yml > pbp.html
+7. (tests)
+8. svn up from the root and commit or revert all changes
+9. Copy the blessed revision to a tag
+10. svn co the tag (on windows and unix) - don't use switch, it doesn't update
+    properties properly
+11. build release files on Windows: $ aap 
+12. build release files on Unix: $ python setup.py sdist
+13. upload pbp-*-setup.exe, pbp-*.zip and pbp-*.tar.gz to berlios
+14. do the file release dance on berlios (hey, make a pbp script for this :)
+15. update Wiki same as #5
+16. upload pbp.html to http://pbp.berlios.de
+17. news item on berlios project
+18. notify freshmeat.net
+19. notify pbp mailing list

@@ -1,0 +1,50 @@
+release: 0.3.0
+news:
+    - date: '2004-11-06T13:48-0700'
+      title: Making Progress on Next Release
+      c: >
+        Oh point four is coming soon.  I've done the hard part, which is
+        the http auth stuff.  The other major thing remaining is comparison
+        testing for the current form values.  Check the [roadmap page
+        http://openfacts.berlios.de/index-en.phtml?title=PBP_TODO] for
+        progress.
+    # '
+
+    - date: '2004-07-24T00:44-0700'
+      title: Minor Project Name Change
+      c: >
+        PBP now stands for "Python Browser Poseur" instead of "Python Browsing
+        Probe." I was getting a lot of porn referrals with the other name.
+        Don't ask.  Links to everything but the first page of the Wiki will
+        still work; for that one link, use the Wiki link on this page as your
+        new bookmark.
+    # '
+
+    - date: '2004-07-05T18:22-0700'
+      title: '0.3.0 Important Feature Release'
+      c: >
+        Major changes are: a command to let testers set the user-agent string
+        and impersonate a different browser, an 'echo' command for writing
+        text into the output, well-behaved shell exit status (>0 if there's a
+        script error), and bugs fixed.
+    # '
+
+    - date: '2004-05-21T12:44-0700'
+      title: '0.2.2 Minor Feature Update Release'
+      c: >
+        Fixed an important bug in the submit command, and added support for
+        the buildbot (see [the Buildbot site http://buildbot.sf.net] and
+        README.buildbot in Buildbot directory).
+         
+        In addition, this release bundles mechanize and its components into
+        the distribution package! The tarball and zip file both contain
+        these components, while the setup.exe has always contained them.
+        This makes installing it from source easier.
+
+    - date: '2004-05-17T12:09-0700'
+      title: '0.2.1 Bugfix Release'
+      c: >
+        This release fixes various places where the threaded implementation
+        would refuse to quit on Unix platforms; scripts will now exit properly
+        there. 
+
