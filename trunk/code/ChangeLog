@@ -1,3 +1,7 @@
+PBP (0.2.1) 
+    User-visible changes: 
+    --------------------- 
+    * Unix will no longer hang when a script is done. (Closes bug 001903)
 PBP (0.2.0)
     User-visible changes:
     ---------------------
