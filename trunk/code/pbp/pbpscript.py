@@ -486,8 +486,8 @@ class PBPShell(cmd.Cmd, object):
 
         e.g.
 
-        fldfinder = self._smartFieldKey('textarea%2') 
-        # ...fldfinder is {'type':str('textarea'), 'nr':1}
+        fldfinder = self._smartFieldKey('textarea%2')  # 1-based
+        # ...fldfinder is {'type':str('textarea'), 'nr':1}  # 0-based
         self.browser.set_value('unf', **fldfinder)
 
         Transform is a dict which will map a field value
