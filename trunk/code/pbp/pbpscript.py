@@ -851,7 +851,7 @@ def run(argv=sys.argv):
         d = defer.Deferred()
         batch = BatchThread(d, o['scripts'], o['cascade-failures'])
         reactor.callLater(0, batch.start)
-        gotError = lambda f: (log.err(), reactor.stop())
+        gotError = lambda f: (log.err(), reactor.stop(), sys.exit(1))
     else:
         d = threads.deferToThread(interactiveLoop)
         gotError = lambda f: log.err()
