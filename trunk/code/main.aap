@@ -38,7 +38,7 @@ pbp-$(version)-setup.exe: dist/pbpscript.exe pbp/wwwsearch.zip
     :sys $(ISCC) pbp.iss
 
 _version.py:
-    # rebuilt when _no.version changes automatically :-) yay aap
+    # rebuilt automatically when _no.version changes :-) yay aap
     @file('_version.py', 'w').write("version = '%s'\n" % (_no.version,))
     
 
