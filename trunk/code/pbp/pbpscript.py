@@ -685,7 +685,12 @@ class BatchThread(threading.Thread):
             time.sleep(0.1)
 
     def _doneWaiting(self, a_thread, script):
+        """After a timeout, all scripts fail.  Turn on cascade, tell
+        the thread we don't care if it keeps going, and call 
+        the failure callback.
+        """
         a_thread.keepgoing = 0
+        self.cascade = 1
         self.cb_scriptDied(error.TimedOutError(self.waiting, self.waiting),
                            script)
 
