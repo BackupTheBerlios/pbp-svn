@@ -1,37 +1,37 @@
-    User-visible changes:
-    * echo command, for writing messages into the log file
-    * Strings that contain literal $ but are not defined variables will 
-      be echoed literally instead of raising an AttributeError
-    * 
+	User-visible changes:
+	* echo command, for writing messages into the log file
+	* Strings that contain literal $ but are not defined variables will 
+	  be echoed literally instead of raising an AttributeError
+	* 
 PBP (0.2.2)
-    User-visible changes:
-    ---------------------
-    * The [stopat] argument of the submit command is used, not ignored.
-    * ``fv'' is a synonym for ``formvalue''
-    * added buildbot directory with stuff for master and slave side
-      of a buildbot.  See README.buildbot.
+	User-visible changes:
+	---------------------
+	* The [stopat] argument of the submit command is used, not ignored.
+	* ``fv'' is a synonym for ``formvalue''
+	* added buildbot directory with stuff for master and slave side
+	  of a buildbot.  See README.buildbot.
 PBP (0.2.1) 
-    User-visible changes: 
-    --------------------- 
-    * Unix will no longer hang when a script is done. (Closes bug 001903)
+	User-visible changes: 
+	--------------------- 
+	* Unix will no longer hang when a script is done. (Closes bug 001903)
 PBP (0.2.0)
-    User-visible changes:
-    ---------------------
-    * pyload/do.  You can pyload a python file that defines __pbp__, and names
-      in __pbp__ will be visible in the pbp interpreter using the do command
-      or by referencing them as strings with $name.
-    * Timeout command now works.  It times out the entire browser
-      session; so in a command like this:
-      $ pbpscript script1.pbp script2.pbp script3.pbp
-      A timeout specified in script1 can expire during the execution
-      of script2, causing both script2 and script3 to fail immediately.
-    * EOF is a synonym for quit/done.
-    Developer-visible changes:
-    --------------------------
-    * Substantial refactoring.  In batch mode, PBP now uses a thread
-      for each script (they still share the same browser session and
-      run in serial).
-    * Exception classses moved into their own module. 
+	User-visible changes:
+	---------------------
+	* pyload/do.  You can pyload a python file that defines __pbp__, and names
+	  in __pbp__ will be visible in the pbp interpreter using the do command
+	  or by referencing them as strings with $name.
+	* Timeout command now works.  It times out the entire browser
+	  session; so in a command like this:
+	  $ pbpscript script1.pbp script2.pbp script3.pbp
+	  A timeout specified in script1 can expire during the execution
+	  of script2, causing both script2 and script3 to fail immediately.
+	* EOF is a synonym for quit/done.
+	Developer-visible changes:
+	--------------------------
+	* Substantial refactoring.  In batch mode, PBP now uses a thread
+	  for each script (they still share the same browser session and
+	  run in serial).
+	* Exception classses moved into their own module. 
 PBP (0.1.0)
-    * Initial release.
+	* Initial release.
 -- Cory Dodt (corydodt@twistedmatrix.com)
