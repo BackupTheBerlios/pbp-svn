@@ -450,6 +450,8 @@ class PBPShell(cmd.Cmd, object):
                 break
         self.tprintln("Set %s in %s to value %s" % (fieldname, formname, value))
 
+    do_fv = do_formvalue
+
 
     def do_submit(self, rest):
         """submit <form>[%submitspec] [stopat]
@@ -468,6 +470,9 @@ class PBPShell(cmd.Cmd, object):
         if formparts:
             submit = formparts[0]
         stopat = None
+        if args[1]:
+            stopat = args[1]
+
 
         self._pickForm(formname)
 
