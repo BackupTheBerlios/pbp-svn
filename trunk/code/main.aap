@@ -13,8 +13,6 @@ ISCC = `util.sibpath(inno.__file__, 'program/ISCC.exe')`
 all: pbp-$(version)-setup.exe pbp-$(version).zip
     :print : Done with all.
 
-:attr {fetch=http://pbp.berlios.de/wwwsearch.zip} pbp/wwwsearch.zip
- 
 
 pbp-$(version).zip: _version.py pbp/wwwsearch.zip
     :sys python setup.py sdist
