@@ -1,7 +1,12 @@
-	User-visible changes:
+	(unversioned yet) User-visible changes:
 	---------------------
 	* --version prints something relevant.
 	* Name change "Python Browsing Probe" -> "Python Browser Poseur"
+	* New command: showlinks--print a nicely formatted list of the links on
+	  the page 
+	* New command: url--show or test the current URL
+	* New command: title--show or test the current <title>
+	* New command: reload--request a reload of the current page
 
 PBP (0.3.0)
 	User-visible changes:
