@@ -1,0 +1,54 @@
+@globs = {}
+@execfile('pbp/version.py', globs)
+:syseval svnversion . | :assign revision
+shortver = `globs['version']`
+@if _no.shortver.endswith('+'):
+    version = $(shortver)r$(revision)
+@else:
+    version = $(shortver)
+@from twisted.python import util
+@import inno
+ISCC = `util.sibpath(inno.__file__, 'program\\ISCC.exe')`
+
+all: pbp-$(version)-setup.exe pbp-$(version).zip
+    :print : Done with all.
+
+
+pbp-$(version).zip: _version.py pbp/wwwsearch.zip
+    :sys python setup.py sdist  --force-manifest --dist-dir .
+
+pbp-$(version)-setup.exe: dist/pbpscript.exe pbp/wwwsearch.zip
+    :python
+        import inno
+        scr = inno.Script(package_version=_no.version, 
+                          author='Cory Dodt',
+                          name='pbp', 
+                          display_name='Python Browsing Probe'
+                          )
+        scr.collect('dist/', exclude_globs=['*.svn*', 'AAPDIR', 
+                                                     'aapdir'])
+        iss = file('pbp.iss', 'w')
+        scr.writeScript(iss)
+        iss.close()
+
+    :copy pbp/wwwsearch.zip dist
+    :sys patch -p0 < patch.diff  # add the icon
+    :sys unix2dos pbp.iss # patch ruins the eol's
+
+    :sys $(ISCC) pbp.iss
+
+_version.py:
+    # rebuilt when _no.version changes automatically :-) yay aap
+    @file('_version.py', 'w').write("version = '%s'\n" % (_no.version,))
+    
+
+dist/pbpscript.exe: _version.py
+    :sys python setup.py py2exe
+    :copy LICENSE.txt dist
+    :copy {r} 3rdparty dist
+    :copy {r} buildbot dist
+
+clean:
+    :sys {f} python setup.py clean --all
+    :del {f} *.iss* *.exe *.zip MANIFEST _version.py
+    :del {r}{f} dist build
