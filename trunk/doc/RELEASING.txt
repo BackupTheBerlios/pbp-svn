@@ -12,8 +12,8 @@ Notes for me.. Things I do when I release
 10. build release files on Unix: $ python setup.py sdist
 11. upload pbp-*-setup.exe, pbp-*.zip and pbp-*.tar.gz to berlios
 12. do the file release dance on berlios (hey, make a pbp script for this :)
-13. update Wiki
-14. update doc/pbp.html including several version strings
+13. update doc/pbp.html including several version strings and download uri
+14. update Wiki as above
 15. upload pbp.html to http://pbp.berlios.de
 16. news item on berlios project
 17. notify freshmeat.net
