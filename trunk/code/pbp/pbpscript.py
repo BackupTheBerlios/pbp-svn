@@ -47,20 +47,25 @@ It is a regular expression.  HTTP requesting works like this:
             had been done.
 Continue following the steps until we hit the defined timeout or a stop.
 """
+from twisted.python import threadable, log, failure, usage, util
+threadable.init(1)
+from twisted.internet import reactor, defer, threads
+
 import sys
 import time
-import urllib2
 import mimetypes
-from twisted.internet import reactor, defer, threads
-from twisted.python import threadable, log, failure, usage
-threadable.init(1)
+import threading
 
 import cmd, shlex, re
 import fnmatch
 
-import mechanize, ClientCookie, ClientForm
+import urllib2, mechanize, ClientCookie, ClientForm
+
+# sibling
+from pbp import error
 
 shlex_split = lambda s: shlex.split(s, comments=True)
+tprintln = lambda *s: reactor.callFromThread(util.println, *s)
 
 def trunc(s, length, end=1):
     """Truncate a string s to length length, by cutting off the last 
@@ -81,6 +86,7 @@ class PBPShell(cmd.Cmd, object):
         # handle refresh and meta refresh with time 0
         self.browser.set_handle_equiv(ClientCookie.HTTPEquivProcessor)
         self.browser.set_handle_refresh(ClientCookie.HTTPRefreshProcessor)
+        # TODO - utidylib handler
         self.last_res = None
         self.refresh_target = None
         self.refresh_time = -1
@@ -101,7 +107,7 @@ class PBPShell(cmd.Cmd, object):
             self.last_res = browsemethod()
             self.last_code = self.last_res.wrapped.code
         except urllib2.HTTPError, e:
-            print e
+            tprintln(e)
             self.last_res = None
             self.last_code = e.code
             return
@@ -116,15 +122,15 @@ class PBPShell(cmd.Cmd, object):
             if not self.last_res:
                 return
             if stopat is None:
-                print 'done at %s' % (self.last_res.wrapped.url)
+                tprintln('done at %s' % (self.last_res.wrapped.url))
                 return
             else:
                 try:
                     last_data = self._extractResponseData()
-                except NoResponseError:
+                except error.NoResponseError:
                     return
                 if re.search(stopat, last_data, re.I): 
-                    print 'found expr in page %s'%(self.last_res.wrapped.url,)
+                    tprintln('found expr in page %s'%(self.last_res.wrapped.url,))
                     return
                 if self.refresh_time > 0:
                     time.sleep(self.refresh_time)
@@ -132,7 +138,7 @@ class PBPShell(cmd.Cmd, object):
                     browsemethod = (lambda :
                         self.browser.open(self.refresh_url))
                 else:
-                    raise DataNotFoundError(stopat, self.last_res)
+                    raise error.DataNotFoundError(stopat, self.last_res)
 
 
     def _parseRefresh(self, st):
@@ -156,9 +162,15 @@ class PBPShell(cmd.Cmd, object):
             fn = args[0]
             file(fn, 'w').write(history)
         else:
-            print "### Begin history ###"
-            print history
-            print "### End history ###"
+            tprintln("### Begin history ###")
+            tprintln(history)
+            tprintln("### End history ###")
+
+    def _scheduleSuicide(self, time):
+        ..
+
+    def _timedOut(self):
+        raise error.TimedOutError(self.timeout, self.timeout)
 
     def do_timeout(self, rest):
         """timeout <time>
@@ -171,7 +183,7 @@ class PBPShell(cmd.Cmd, object):
         in your script; default is 300 (5 minutes).  Contrast to endtimer.
         """
         newtime = shlex_split(rest)[0]
-        print 'new timeout %s' % (newtime,)
+        tprintln('new timeout %s' % (newtime,))
         self.timeout = int(newtime)
 
     def do_code(self, rest):
@@ -181,13 +193,13 @@ class PBPShell(cmd.Cmd, object):
         actual = str(self.last_code)
         codes = shlex_split(rest)
         if not codes:
-            print self.last_code
+            tprintln(self.last_code)
             return
         for expected in codes:
             if fnmatch.fnmatch(actual, expected):
-                print 'OK: code was %s' % (actual,)
+                tprintln('OK: code was %s' % (actual,))
                 return
-        raise NoCodeMatchError(expected, self.last_res, self.last_code)
+        raise error.NoCodeMatchError(expected, self.last_res, self.last_code)
     
     def do_find(self, rest):
         """find <regex>
@@ -197,9 +209,9 @@ class PBPShell(cmd.Cmd, object):
         data = self._extractResponseData()
         searchst = shlex_split(rest)[0]
         if re.search(searchst, data, re.I):
-            print 'OK: found %s' % (searchst,)
+            tprintln('OK: found %s' % (searchst,))
             return
-        raise DataNotFoundError(searchst, self.last_res)
+        raise error.DataNotFoundError(searchst, self.last_res)
 
     def do_notfind(self, rest):
         """notfind <regex>
@@ -210,21 +222,21 @@ class PBPShell(cmd.Cmd, object):
         data = self._extractResponseData()
         searchst = shlex_split(rest)[0]
         if not re.search(searchst, data, re.I):
-            print 'OK: page didn\'t contain %s' % (searchst,)
+            tprintln('OK: page didn\'t contain %s' % (searchst,))
             return
-        raise DataFoundInappropriatelyError(searchst, self.last_res)
+        raise error.DataFoundInappropriatelyError(searchst, self.last_res)
 
     def do_back(self, rest):
         """Go back in browser history"""
         res = self.browser.back()
         self.last_res = res
         self.last_code = res.wrapped.code
-        print "OK, back at %s" % (res.wrapped.url,)
+        tprintln("OK, back at %s" % (res.wrapped.url,))
     
     def do_starttimer(self, rest):
         """Start timer - use endtimer later to get the time elapsed"""
         self.stored_time = time.time()
-        print "Started the timer."
+        tprintln("Started the timer.")
     
     def do_endtimer(self, rest):
         """endtimer [max]
@@ -242,8 +254,8 @@ class PBPShell(cmd.Cmd, object):
             expected = int(args[0])
         elapsed = time.time() - self.stored_time
         if elapsed > expected:
-            raise TimedOutError(expected, elapsed)
-        print "%s seconds elapsed" % (elapsed,)
+            raise error.TimedOutError(expected, elapsed)
+        tprintln("%s seconds elapsed" % (elapsed,))
 
         self.stored_time = -1
     
@@ -269,39 +281,43 @@ class PBPShell(cmd.Cmd, object):
         """Summarize the forms on the page"""
         for n,f in enumerate(self.browser.forms()):
             if f.name:
-                print "Form name=%s" % (f.name)
+                tprintln("Form name=%s" % (f.name))
             else:
-                print "Form # %s" % (n+1)
+                tprintln("Form # %s" % (n+1))
             if f.controls:
-                print "## __Name______ __Type___ __ID________ __Value__________________"
+                tprintln("## __Name______ __Type___ __ID________ __Value__________________")
             clickies = [c for c in f.controls if c.is_of_kind('clickable')]
             nonclickies = [c for c in f.controls if c not in clickies]
             for field in nonclickies:
-                print "  ",
-                print ("%-12s %-9s" % (trunc(str(field.name), 12), 
-                                       trunc(field.type, 9))),
-                print ("%-12s" % (trunc(field.id or "(None)", 12),)),
                 if hasattr(field, 'possible_items'):
                     value_displayed = "%s of %s" % (field.value,
-                                                  field.possible_items())
+                                                    field.possible_items())
                 else:
                     value_displayed = "%s" % (field.value,)
-                print value_displayed
+                strings = ("  ",
+                           "%-12s %-9s" % (trunc(str(field.name), 12),
+                                           trunc(field.type, 9)),
+                           "%-12s" % (trunc(field.id or "(None)", 12),),
+                           value_displayed,
+                           )
+                tprintln(*strings)
             for n, field in enumerate(clickies):
-                print ("%-2s" % (n+1,)),
-                print ("%-12s %-9s" % (trunc(field.name, 12), 
-                                       trunc(field.type, 9))),
-                print ("%-12s" % (trunc(field.id or "(None)", 12),)),
-                print field.value
+                strings = ("%-2s" % (n+1,),
+                           "%-12s %-9s" % (trunc(field.name, 12),
+                                           trunc(field.type, 9)),
+                           "%-12s" % (trunc(field.id or "(None)", 12),),
+                           field.value,
+                           )
+                tprintln(*strings)
             
     def do_show(self, rest):
         """Show the data in the last http response.
         """
-        print self._extractResponseData()
+        tprintln(self._extractResponseData())
 
     def do_done(self, rest):
         """Quit"""
-        print 'Bye.'
+        tprintln('Bye.')
         sys.exit(0)
     do_EOF = do_exit = do_quit = do_done
 
@@ -318,7 +334,7 @@ class PBPShell(cmd.Cmd, object):
         except mechanize.FormNotFoundError, e:
             pass
         if self.browser.form is None:
-            raise MissingFormError(formspec)
+            raise error.MissingFormError(formspec)
 
     def _smartFieldKey(self, field, transform=None):
         """Look for a control in the order: name, id, type, nr.
@@ -390,10 +406,10 @@ class PBPShell(cmd.Cmd, object):
             formname = args.pop(0)
             fieldspec = args.pop(0)
         except IndexError:
-            raise PBPUsageError("formvalue " + rest)
+            raise error.PBPUsageError("formvalue " + rest)
         value = ' '.join(args)
         if not value:
-            raise PBPUsageError("formvalue " + rest)
+            raise error.PBPUsageError("formvalue " + rest)
 
         self._pickForm(formname)
 
@@ -419,7 +435,7 @@ class PBPShell(cmd.Cmd, object):
             if k != 'nr':
                 fieldname = fieldfinder[k]
                 break
-        print "Set %s in %s to value %s" % (fieldname, formname, value)
+        tprintln("Set %s in %s to value %s" % (fieldname, formname, value))
 
 
     def do_submit(self, rest):
@@ -516,7 +532,7 @@ class PBPShell(cmd.Cmd, object):
                 last_err = e
                 continue
         if not thelink:
-            print "oops!  couldn't find any link like %s" % (matchable,)
+            tprintln("oops!  couldn't find any link like %s" % (matchable,))
             raise last_err
 
         self.journeyAndRefresh(lambda : self.browser.follow_link(**kwargs), 
@@ -525,15 +541,15 @@ class PBPShell(cmd.Cmd, object):
 
     def do_pyload(self, rest):
         """pyload <filename>"""
-        print "load some python TODO"
+        tprintln("load some python TODO")
 
     def do_do(self, rest):
         """do <python_callable> [arguments]"""
-        print "do some python stuff TODO"
+        tprintln("do some python stuff TODO")
 
     def _extractResponseData(self):
         if not self.last_res:
-            raise NoResponseError()
+            raise error.NoResponseError()
         self.last_res.seek(0)
         return self.last_res.read()
 
@@ -550,15 +566,15 @@ class PBPShell(cmd.Cmd, object):
         try:
             self.history.append(line)
             return cmd.Cmd.onecmd(self, line)
-        except PBPScriptError, e:
-            print "*** ERROR ***"
-            print e
+        except error.PBPScriptError, e:
+            tprintln("*** ERROR ***")
+            tprintln(e)
             if self.canfail:
                 raise
         except SystemExit:
             raise
         except Exception, e:
-            print "*** ERROR ***"
+            tprintln("*** ERROR ***")
             log.err()
             if self.canfail:
                 raise
@@ -581,7 +597,7 @@ def _parseBool(s):
         return True, None
     if s.lower() in ['n', 'no', 'off', 'false', '0']:
         return False, None
-    raise FieldValueError(s)
+    raise error.FieldValueError(s)
 
 def _unPercent(st):
     """Return 2-tuple of (leftpart, rightpart)
@@ -596,13 +612,54 @@ def _unPercent(st):
 
 
  
-def bye(result):
-    log.msg(result)
-    reactor.stop()
+#
+class BatchThread(threading.Thread):
+    """Run commands from all scripts, non-interactively"""
+    def __init__(self, deferred, scripts, cascade=0):
+        self.cascade = cascade # if 1, any errors stop all scripts at once
+        self.scripts = scripts
+        self.deferred = deferred
+        self._more_scripts = 1 # set to 0 to prevent running any scripts 
+                               # that still haven't been processed
+        self._more_commands = 1
+        threading.Thread.__init__(self)
 
-def gotExit(failure):
-    failure.trap(SystemExit)
-    reactor.stop()
+    def scriptDied(self, script, failed):
+        tprintln(failed)
+        tprintln('*** FAILURE: %s ***' % (script,))
+        if self.cascade:
+            self._more_scripts = 0
+        self._more_commands = 0 # don't do any more commands in this script
+
+    def _doScript(self, script, shell):
+        self._more_commands = 1
+        for command in file(script, 'r'):
+            if self._more_commands:
+                try:
+                    shell.onecmd(command)
+                except Exception, e:
+                    self.scriptDied(script, e)
+
+    def run(self):
+        try:
+            shell = PBPShell(canfail=1)
+            
+            for s in self.scripts:
+                if self._more_scripts:
+                    self._doScript(s, shell)
+                else:
+                    tprintln('*** Cascaded FAILURE: %s ***' % (s,))
+            self.deferred.callback(None)
+        except Exception, e:
+            self.deferred.errback(e)
+
+
+#
+def interactiveLoop():
+    shell = PBPShell()
+    shell.cmdloop()
+
+
 
 class PBPOptions(usage.Options):
     optFlags = [
@@ -613,148 +670,27 @@ failure.'''],
     def parseArgs(self, *scripts):
         self['scripts'] = scripts 
 
+def bye(result):
+    log.msg(result)
+    reactor.stop()
 
-class PBPScriptError(Exception):
-    """Type for all pbpscript errors for easier catching"""
-
-CF = ClientForm; CC = ClientCookie; mz = mechanize
-webinteraction_errors = (urllib2.HTTPError, 
-                         urllib2.URLError,
-                         PBPScriptError,
-                         CF.ControlNotFoundError, 
-                         CF.ParseError,
-                         CF.ItemNotFoundError, 
-                         CF.ItemCountError,
-                         CC.LoadError, 
-                         CC.RobotExclusionError,
-                         mz.BrowserStateError, 
-                         mz.FormNotFoundError,
-                         mz.LinkNotFoundError,
-                         )
-def automateScripts(scripts, cascade=0):
-    """Run commands from scripts, non-interactively"""
-    keepgoing = 1  # If 0, any scripts left on the CL are failed;
-                   # This permits us to print a failure message
-                   # for each one instead of skipping it entirely
-    shell = PBPShell(canfail=1)
-    for s in scripts:
-        if keepgoing:
-            try:
-                for command in file(s, 'r'):
-                    shell.onecmd(command)
-                print 'SUCCESS: %s' % (s,)
-            except webinteraction_errors, e:
-                print e
-                print '*** FAILURE: %s ***' % (s,)
-                if cascade:
-                    keepgoing = 0
-        else:
-            print '*** FAILURE: %s ***' % (s,)
-
-def interactiveLoop():
-    shell = PBPShell()
-    shell.cmdloop()
+def gotExit(failure):
+    failure.trap(SystemExit)
+    reactor.stop()
 
 
 def run(argv=sys.argv):
     o = PBPOptions()
     o.parseOptions(argv[1:])
     if o['scripts']:
-        d = threads.deferToThread(automateScripts, o['scripts'], 
-                                  o['cascade-failures'])
-        gotError = lambda f: reactor.stop()
+        d = defer.Deferred()
+        batch = BatchThread(d, o['scripts'], o['cascade-failures'])
+        batch.start()
+        gotError = lambda f: (log.err(), reactor.stop())
     else:
         d = threads.deferToThread(interactiveLoop)
-        gotError = lambda f: None
+        gotError = lambda f: log.err()
     d.addCallback(bye)
     d.addErrback(gotExit).addErrback(gotError)
     reactor.run()
-
-
-
-
-
-class NoResponseError(PBPScriptError):
-    """An attempt to access the last_res failed because no response
-    has been seen from the server
-    """
-    def __str__(self):
-        t = "failed because there was no response from the server"
-        return t
-    __repr__ = __str__
-
-
-class TimedOutError(PBPScriptError):
-    """Too much time elapsed (do_endtimer)"""
-    def __init__(self, expected, elapsed):
-        self.expected = expected
-        self.elapsed = elapsed
-    def __str__(self):
-        t = "Operation took %s seconds but %s was the maximum"
-        return t % (self.elapsed, self.expected)
-
-class MissingFormError(PBPScriptError):
-    def __init__(self, formspec):
-        self.formspec = formspec
-    def __str__(self):
-        return "No form %s found on the page." % (self.formspec,)
-    __repr__ = __str__
-
-class NoCodeMatchError(PBPScriptError):
-    def __init__(self, expected, response, code):
-        self.expected = expected
-        self.response = response
-        self.code = code
-    def __str__(self):
-        if self.response:
-            t = "\
-Page %(url)s came back with code %(code)s but you expected %(expected)s"
-            return t % dict(url=self.response.wrapped.url, code=self.code,
-                            expected=self.expected) 
-        else:
-            t = "Server error code was %(code)s but you expected %(expected)s"
-            return t % dict(code=self.code,
-                            expected=self.expected)
-    __repr__ = __str__
-
-class DataNotFoundError(PBPScriptError):
-    """text expected by the find command (or the stopat
-    argument of go/submit/follow) was not found
-    """
-    def __init__(self, expected, response):
-        self.response = response
-        self.expected = expected # the string used to search
-    def __str__(self):
-        t = "Page %s didn't match the search string: %s"
-        return t % (self.response.wrapped.url, self.expected)
-    __repr__ = __str__
-
-class DataFoundInappropriatelyError(PBPScriptError):
-    """text expected by the nofind command (or the stopat
-    argument of go/submit/follow) was found and shouldn't have been
-    """
-    def __init__(self, expected, response):
-        self.response = response 
-        self.expected = expected # the string used to search
-    def __str__(self):
-        t = "Page %s matched the search string, even though it shouldn't have: %s"
-        return t % (self.response.wrapped.url, self.expected)
-    __repr__ = __str__
-
-class PBPUsageError(PBPScriptError):
-    def __init__(self, command):
-        self.command = command
-    def __str__(self):
-        fullcmd = self.command
-        shortcmd = shlex_split(self.command)[0]
-        return "This command failed: %s (try help %s)" % (fullcmd, shortcmd)
-
-    __repr__ = __str__
-
-class FieldValueError(PBPScriptError):
-    def __init__(self, val):
-        self.val = val
-    def __str__(self):
-        return "The value %s specified for the field was impossible.  (Did you forget a + or -?)" % (self.val,)
-    __repr__ = __str__
 
