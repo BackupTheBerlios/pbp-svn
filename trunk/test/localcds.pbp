@@ -1,0 +1,56 @@
+starttimer
+timeout 30                # seconds (this is the default, but hey.) give up
+                          # any step after 30 seconds
+
+# get a start page, do some form stuff
+go http://localhost:6080 loginform  # open the location and follow redirects
+                          # until a page containing regular expression
+                          # "loginform" is returned or there are no more
+                          # redirects.
+find "branch"         # the regex branch is somewhere on this page
+formvalue loginform username adminx
+formvalue loginform password password
+submit loginform Courses # ... submit then check for "Courses" regex
+                         # on the next page (like go)
+code 2*         # verify that we got response 200 (201...) on the last request
+notfind woopdy-doo  # verify that the page does not contain ...
+
+# friendlier way to go through links than go, using the last response
+# data as context (as a browser would :)
+follow Courses "Language Arts"  # click the link with Courses, either in the
+                          # id, the name, or the text
+follow langarts
+follow Themes
+follow "Unit 1"
+
+find bnbox
+
+pyload resetdb.pbp.py     # load callables from pbpnames object in resetdb 
+do reset_db               # assuming reset_db() was found in resetdb.pbp.py,
+                          # run that code
+
+endtimer 5     # whole script should take less than 5 seconds
+
+go /wack   # test that we try to go to forbidden pages without ending 
+           # the script
+code 403 5*
+back   # back in the browser history, to before we got this error. 
+       # We have "forward" too, if you need it.
+
+go /newteacher
+formvalue 1 firstname Margaret
+formvalue 1 lastname Fischer
+formvalue 1 username mfischer
+formvalue 1 password mfischer
+formvalue 1 password%2 mfischer
+submit 1%2 
+find "Entry was added."
+
+
+
+# done                      # hang up the phone.
+
+# Interesting commands when using the interpreter interactively:
+#  show       - look at the response data
+#  showform   - summarize the current form
+#  pdb        - debugger

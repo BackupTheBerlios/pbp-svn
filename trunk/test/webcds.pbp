@@ -1,0 +1,33 @@
+go http://webcds-devel.cyberhigh.org
+
+
+# log in
+formvalue 1 username manager
+formvalue 1 password manager
+submit 1 Hello.*manager
+
+### new site
+follow site
+formvalue 1 name Vacaville site
+formvalue 1 street "1 One way"
+formvalue 1 city "Vacaville"
+formvalue 1 state "California"
+formvalue 1 zip "91919"
+formvalue 1 phone '111-222-3333'
+formvalue 1 create_admin on
+formvalue 1 create_school on
+formvalue 1 workstations 20
+formvalue 1 students 1000
+submit 1%2 
+
+# oops, state must be 2 characters
+formvalue 1 state CA
+submit 1%2
+
+formvalue 1 site +nyc
+submit 1
+
+
+### approve exam
+follow approve
+
