@@ -1,5 +1,6 @@
 	(unversioned yet) User-visible changes:
 	---------------------
+	* Don't blow up when a submit takes you to a location with an error code.
 	* Put wwwsearch.zip first in sys.path so conflicting versions installed on
 	  the system already won't cause problems.
 	* http auth urls are supported.
