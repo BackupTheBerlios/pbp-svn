@@ -1,7 +1,0 @@
-pyload loader.pbp.py
-do test
-do test 1 2 3
-go $uri
-follow $link
-follow $dont_export
-
