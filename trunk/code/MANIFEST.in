@@ -1,3 +1,5 @@
 include pbpscript
 include patch.diff
 include main.aap
+include README.txt
+include LICENSE.txt

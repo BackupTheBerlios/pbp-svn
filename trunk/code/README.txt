@@ -11,6 +11,8 @@ About
 
    More detail is available at the Wiki.
 
+   PBP is MIT-licensed.  Refer to LICENSE.txt for the text of this license.
+
 Prerequisites (Dependencies)
 
      * Download Twisted
@@ -31,7 +33,11 @@ Installing:
    $ python setup.py install
 
    On Windows, you can also get a self-installing executable at the download
-   site listed below.
+   site listed at the bottom.  Please note that the Windows package 
+   contains code created by third parties, and their licenses are
+   installed with the rest of the software.  You must obey these
+   third party licenses as well as LICENSE.txt if you wish
+   to redistribute pbp as a Windows package.
 
 How-To
 

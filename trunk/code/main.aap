@@ -19,7 +19,8 @@ pbp-$(version)-setup.exe: dist/pbpscript/pbpscript.exe
                           name='pbp', 
                           display_name='Python Browsing Probe'
                           )
-        scr.collect('dist/pbpscript')
+        scr.collect('dist/pbpscript', exclude_globs=['*.svn*', 'AAPDIR', 
+                                                     'aapdir'])
         scr.writeScript(open('pbp.iss', 'w'))
 
     :sys patch -p0 < patch.diff  # add the icon
@@ -29,3 +30,6 @@ pbp-$(version)-setup.exe: dist/pbpscript/pbpscript.exe
 
 dist/pbpscript/pbpscript.exe:
     :sys python setup.py py2exe
+    :copy LICENSE.txt dist/pbpscript
+    :copy {r} 3rdparty dist/pbpscript
+
