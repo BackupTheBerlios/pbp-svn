@@ -2,8 +2,7 @@ include MANIFEST.in
 include pbpscript patch.diff main.aap pbp/wwwsearch.zip
 
 include README.txt LICENSE.txt
-include 3rdparty COPYING.*
-
-include buildbot run_pbpcript.*
+graft 3rdparty
+graft Buildbot
 
 global-exclude */.svn/*

@@ -26,7 +26,8 @@ setup_args = dict(name="pbp", author="Cory Dodt",
                   version=version,
                   scripts=['pbpscript'], packages=['pbp'],
                   data_files = [('pbp', ['pbp/wwwsearch.zip',])],
-                  cmdclass = dict(install_data = smart_install_data),
+                  cmdclass = dict(install_data = smart_install_data,
+                                  ),
                   )
 
 
