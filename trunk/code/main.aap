@@ -2,8 +2,8 @@
 @execfile('pbp/version.py', globs)
 :syseval svnversion . | :assign revision
 shortver = `globs['version']`
-@if _no.version.endswith('+'):
-    version = $(shortver)+r$(revision)
+@if _no.shortver.endswith('+'):
+    version = $(shortver)r$(revision)
 @else:
     version = $(shortver)
 @from twisted.python import util
