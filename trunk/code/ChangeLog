@@ -1,5 +1,6 @@
 	(unversioned yet) User-visible changes:
 	---------------------
+	* http auth urls are supported.
 	* <meta refresh> tags that contain only a time and no url are
 	  parsed correctly instead of raising an exception.
 	* Buildbot: pbpstep.py runs only one .tests file, named on the command

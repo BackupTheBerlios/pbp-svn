@@ -61,6 +61,7 @@ import sys
 import time, Queue
 import mimetypes
 import threading
+import urlparse
 
 import cmd, shlex, re
 import fnmatch
@@ -110,7 +111,9 @@ class PBPShell(cmd.Cmd, object):
         self.browser.set_handle_refresh(ClientCookie.HTTPRefreshProcessor)
         # TODO - utidylib/BeautifulSoup handler
         # TODO - self.browser.set_cookiejar and use bsddb cookies
-        # TODO - self.browser.set_credentials for http auth?
+        self.passwords = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        self.browser.set_credentials(self.passwords)
+        
         self.last_res = None
         self.refresh_target = None
         self.refresh_time = -1
@@ -125,9 +128,6 @@ class PBPShell(cmd.Cmd, object):
     def journey(self, browsemethod):
         """
         Go there, and set up refreshes for later.
-        stopat is a regular expression to look for.  See help(pbpscript)
-        TODO - check for any javascript that might be trying to send
-        us away, too.
         """
         try:
             self.last_res = browsemethod()
@@ -164,8 +164,7 @@ class PBPShell(cmd.Cmd, object):
                     browsemethod = (lambda :
                         self.browser.open(self.refresh_url))
                 else:
-                    raise error.DataNotFoundError(stopat, self.last_res)
-
+                    raise error.DataNotFoundError(stopat, self.last_res) 
 
     def _parseRefresh(self, st):
         """Return time and url for a refresh header"""
@@ -382,13 +381,35 @@ class PBPShell(cmd.Cmd, object):
         try to keep going until a page is found with that text.
         If the link never reaches a page containing stopat, give
         an error like find (help find for details).
+        URLs of the form "http://user:pass@host/..." are also accepted.
         """
         args = self._getCountedArgs("go " + rest, 1, 2)
         stopat = None
         if len(args) > 1:
             stopat = args[1]
 
-        self.journeyAndRefresh(lambda : self.browser.open(args[0]), stopat)
+        # parse user:pass out of hostname and, if present, set that password.
+        url = args[0]
+        # we need two representations of the url.
+        # 1 - containing the user:pass so we can extract those and set_creds
+        # 2 - w/ scheme and w/o creds, for browser.open
+        parsed = urlparse.urlparse(url) # 1
+        hostport = parsed[1]
+        # remember hostport to pass to browser.open
+        credshost = hostport.split('@')
+        creds = None
+        if len(credshost) == 2:
+            creds, hostport = credshost
+        if creds:
+            credargs = creds.split(':')
+            if len(credargs) != 2:
+                raise error.ImproperCredentialsError(creds)
+            user, password = credargs
+            self.passwords.add_password(None, hostport, user, password)
+        scheme_parts = [parsed[0], hostport] + list(parsed[2:])
+        url_scheme = urlparse.urlunparse(scheme_parts) # 2
+
+        self.journeyAndRefresh(lambda : self.browser.open(url_scheme), stopat)
 
     def do_pdb(self, rest):
         """debugger"""

@@ -114,4 +114,10 @@ class FieldValueError(PBPScriptError):
         return "The value %s specified for the field was impossible.  (Did you forget a + or -?)" % (self.val,)
     __repr__ = __str__
 
+class ImproperCredentialsError(PBPScriptError):
+    def __init__(self, creds):
+        self.creds = creds 
+    def __str__(self):
+        return "The credentials given: \"%s\" did not contain both a user and password." % (self.creds,)
+
 
