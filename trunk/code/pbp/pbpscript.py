@@ -715,6 +715,7 @@ class BatchThread(threading.Thread):
         self.waiting = 1
         threading.Thread.__init__(self)
         self.succeeded = 0
+        self.some_scripts_failed = 0
 
     def cb_scriptDied(self, failed, script):
         tprintln(failed)
@@ -754,15 +755,19 @@ class BatchThread(threading.Thread):
                     reactor.callFromThread(later)
                     t.start()
                     self._waitScript(t, s)
+                    # remember if this script failed; this affects
+                    # exit status on the command line
+                    if not self.succeeded:
+                        self.some_scripts_failed = 1
                 else:
                     tprintln('*** Cascaded FAILURE: %s ***' % (s,))
             # exit status (determined by calling callback or errback)
-            # depends on success or failure of last script
-            if self.succeeded:
-                reactor.callFromThread(self.deferred.callback, None)
-            else:
+            # depends on whether any scripts failed
+            if self.some_scripts_failed:
                 reactor.callFromThread(self.deferred.errback,
                                        error.PBPScriptError())
+            else:
+                reactor.callFromThread(self.deferred.callback, None)
         except Exception, e:
             reactor.callFromThread(self.deferred.errback, e)
 
@@ -867,6 +872,6 @@ def run(argv=sys.argv):
     reactor.run()
     # interactive always exits with status 0; batch may or may not
     # have been successful
-    if not getattr(batch, 'succeeded', True):
+    if getattr(batch, 'some_scripts_failed', False):
         sys.exit(1)
 
