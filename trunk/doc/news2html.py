@@ -59,7 +59,6 @@ class Page(rend.Page):
     def _render_para(self, para):
         text = []
         nodes = []
-        para = ' '.join(para.splitlines())
         scanned = scanner.scan(para)
         for tok in scanned:
             nodes.append(tok)
