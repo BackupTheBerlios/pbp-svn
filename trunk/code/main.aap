@@ -1,10 +1,15 @@
 @globs = {}
 @execfile('pbp/version.py', globs)
 :syseval svnversion . | :assign revision
-version = `globs['version']`+r$(revision)
+shortver = `globs['version']`
+version = $(shortver)+r$(revision)
 
-all: pbp-$(version)-setup.exe
+all: pbp-$(version)-setup.exe pbp-$(shortver).zip
     :print : Done with all.
+
+pbp-$(shortver).zip:
+    :sys python setup.py sdist
+    :move dist/$target .
 
 pbp-$(version)-setup.exe: dist/pbpscript/pbpscript.exe
     :python

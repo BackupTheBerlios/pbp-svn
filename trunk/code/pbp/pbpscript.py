@@ -605,6 +605,11 @@ def gotExit(failure):
     reactor.stop()
 
 class PBPOptions(usage.Options):
+    optFlags = [
+                ['cascade-failures', 'C', '''\
+If any one script fails, the remaining scripts will not run and will report
+failure.'''],
+                ]
     def parseArgs(self, *scripts):
         self['scripts'] = scripts 
 
@@ -614,6 +619,7 @@ class PBPScriptError(Exception):
 
 CF = ClientForm; CC = ClientCookie; mz = mechanize
 webinteraction_errors = (urllib2.HTTPError, 
+                         urllib2.URLError,
                          PBPScriptError,
                          CF.ControlNotFoundError, 
                          CF.ParseError,
@@ -625,7 +631,7 @@ webinteraction_errors = (urllib2.HTTPError,
                          mz.FormNotFoundError,
                          mz.LinkNotFoundError,
                          )
-def automateScripts(scripts):
+def automateScripts(scripts, cascade=0):
     """Run commands from scripts, non-interactively"""
     keepgoing = 1  # If 0, any scripts left on the CL are failed;
                    # This permits us to print a failure message
@@ -640,7 +646,8 @@ def automateScripts(scripts):
             except webinteraction_errors, e:
                 print e
                 print '*** FAILURE: %s ***' % (s,)
-                keepgoing = 0
+                if cascade:
+                    keepgoing = 0
         else:
             print '*** FAILURE: %s ***' % (s,)
 
@@ -653,7 +660,8 @@ def run(argv=sys.argv):
     o = PBPOptions()
     o.parseOptions(argv[1:])
     if o['scripts']:
-        d = threads.deferToThread(automateScripts, o['scripts'])
+        d = threads.deferToThread(automateScripts, o['scripts'], 
+                                  o['cascade-failures'])
         gotError = lambda f: reactor.stop()
     else:
         d = threads.deferToThread(interactiveLoop)
