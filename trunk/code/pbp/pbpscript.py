@@ -66,7 +66,7 @@ import urlparse
 import cmd, shlex, re
 import fnmatch
 
-sys.path.append(util.sibpath(__file__, 'wwwsearch.zip'))
+sys.path.insert(0, util.sibpath(__file__, 'wwwsearch.zip'))
 
 import urllib2, mechanize, ClientCookie, ClientForm
 
