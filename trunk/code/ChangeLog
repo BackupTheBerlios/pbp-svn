@@ -7,6 +7,7 @@
 	* New command: url--show or test the current URL
 	* New command: title--show or test the current <title>
 	* New command: reload--request a reload of the current page
+	* Fixed a minor formatting problem in showform
 
 PBP (0.3.0)
 	User-visible changes:
