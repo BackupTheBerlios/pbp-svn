@@ -1,5 +1,7 @@
 	(unversioned yet) User-visible changes:
 	---------------------
+	* Updated to upstream's most recent ClientCookie (1.0.0a)/ClientForm
+	  (0.1.16).
 	* BatchThread's deferred errback will now contain the last PBPScriptError
 	  instance (tracker patch 268)
 	* Don't blow up when a submit takes you to a location with an error code.
