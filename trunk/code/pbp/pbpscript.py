@@ -131,10 +131,14 @@ class PBPShell(cmd.Cmd, object):
         """
         try:
             self.last_res = browsemethod()
+            # can't set the code if the last journey gave us an error,
+            # so raise the error instead
+            if isinstance(self.last_res, urllib2.HTTPError):
+                raise self.last_res
             self.last_code = self.last_res.wrapped.code
         except urllib2.HTTPError, e:
             self.tprintln(e)
-            self.last_res = None
+            self.last_res = e
             self.last_code = e.code
             return
         refresh = self.last_res.wrapped.info().getheader('REFRESH')
@@ -145,7 +149,8 @@ class PBPShell(cmd.Cmd, object):
         while 1:
             self.journey(browsemethod)
 
-            if not self.last_res:
+            if (self.last_res is None or 
+                isinstance(self.last_res, urllib2.HTTPError)):
                 return
             if stopat is None:
                 self.tprintln('done at %s' % (self.last_res.wrapped.url))
