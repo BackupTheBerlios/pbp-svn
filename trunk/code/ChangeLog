@@ -1,5 +1,7 @@
 	(unversioned yet) User-visible changes:
 	---------------------
+	* Put wwwsearch.zip first in sys.path so conflicting versions installed on
+	  the system already won't cause problems.
 	* http auth urls are supported.
 	* <meta refresh> tags that contain only a time and no url are
 	  parsed correctly instead of raising an exception.
