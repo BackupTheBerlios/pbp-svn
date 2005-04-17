@@ -1,5 +1,5 @@
 from buildbot.process import step
-from buildbot.status import event
+from buildbot.status import builder
 
 import re
 import os
@@ -12,44 +12,47 @@ class PBP(step.ShellCommand):
         if not filename:
             raise TypeError("please pass a .tests file")
         command = "python run_pbpscript %s" % (filename,)
-        self.statusName = "pbp %s" % (os.path.basename(filename),)
+        self.statusName = "%s" % (os.path.basename(filename),)
         step.ShellCommand.__init__(self, command=command, **kwargs)
 
-    def startStatus(self):
-        evt_text = "running %s" % (self.statusName,)
-        evt = event.Event("yellow", evt_text.split(),
-                          files={'log':self.log})
-        self.setCurrentActivity(evt)
-
-    def finished(self, rc):
+    def createSummary(self, log):
         self.failures = 0
         self.successes = 0
-        if rc:
-            self.failures = 1
-        output = self.log.getAll()
-        self.failures += len(re.findall('\*\*\* .*FAILURE: (.*)\*\*\*', output))
+        output = log.getText()
+        failuretext = re.findall('\*\*\* .*FAILURE: (.*)\*\*\*', output)
+        self.failures += len(failuretext)
         self.successes += len(re.findall('\nSUCCESS: ', output))
+        if self.failures:
+            self.addCompleteLog('failures', '\n'.join(failuretext))
 
 
-        result = (step.SUCCESS, [str(self.successes), self.statusName, 'passed'])
+    def getText(self, cmd, results):
+        res = ("---- %s %s passed" % (self.successes,
+                                     self.statusName)).split()
 
         total = self.failures + self.successes
 
         if self.failures:
-            result = (step.FAILURE, ['%s/%s' % (self.failures, total),
-                                     self.statusName,
-                                     'failures'])
+            res = ('--- %s/%s %s failures' % (self.failures, total, 
+                                              self.statusName)).split()
 
-        return self.stepComplete(result)
-
-    def finishStatus(self, result):
-        tot = self.failures + self.successes
+        return self.describe() + res
+    def getColor(self, cmd, results):
         if self.failures:
-            color = "red"
-            text = ("%s/%s %s tests failed" % (self.failures, tot, self.statusName)).split()
-        else:
-            color = "green"
-            text = ("%s tests succeeded" % (self.successes)).split()
-        self.updateCurrentActivity(color=color, text=text)
-        self.finishStatusSummary()
-        self.finishCurrentActivity()
+            return 'red'
+        return 'green'
+
+#    def finishStatus(self, result):
+#        tot = self.failures + self.successes
+#        _d = dict(failures=self.failures, total=tot, name=self.statusName,
+#                  successes=self.successes)
+#        if self.failures:
+#            _t = "%(failures)s/%(total)s %(name)s failed" 
+#            color = "red"
+#        else:
+#            _t = "%(successes)s %(name)s succeeded" 
+#            color = "green"
+#        text = (_t % _d).split()
+#        self.updateCurrentActivity(color=color, text=text)
+#        self.finishStatusSummary()
+#        self.finishCurrentActivity()
