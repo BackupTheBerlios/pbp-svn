@@ -1,5 +1,6 @@
 	(unversioned yet) User-visible changes:
 	---------------------
+	* pbpstep.py is compatible with released version of BuildBot (0.6.1) again
 	* Update ClientForm to upstream's latest release.
 	* BatchThread's deferred errback will now contain the last PBPScriptError
 	  instance (tracker patch 268)
